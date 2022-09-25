@@ -6,12 +6,12 @@ const BASE_API_URL = 'https://api.github.com/repos';
 /**
  * @summary Get contributors given the specified owner/repository
  * @param {string} [owner] Repository's owner
- * @param {string} [repository] Repository
+ * @param {string} [repositoryName] Repository name
  * @returns Collection of github contribuitors
  */
-async function fetchRepositoryContributors(owner = 'facebook', repository = 'react'): Promise<GithubContributor[]> {
+async function fetchRepositoryContributors(owner = 'facebook', repositoryName = 'react'): Promise<GithubContributor[]> {
   try {
-    const response = await fetch(`${BASE_API_URL}/${owner}/${repository}/contributors`);
+    const response = await fetch(`${BASE_API_URL}/${owner}/${repositoryName}/contributors`);
     const contribuitors = response.json();
     return contribuitors;
   } catch(error) {
