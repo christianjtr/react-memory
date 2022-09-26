@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { Contributor } from '../types/Contributor';
 import { fetchRepositoryContributors } from '../services/github.services';
@@ -7,7 +7,7 @@ import { adaptGithubContributors } from '../adapters/contributor.adapter';
 interface GithubContributorHookInterface {
   isLoading: boolean;
   contributors: Contributor[];
-  fetchData: (repository?: { owner: string; name: string }) => void;
+  fetchData: (repository?: { owner: string; name: string }) => Promise<void>;
 }
 
 const useGithubContributors = (): GithubContributorHookInterface => {
@@ -22,10 +22,6 @@ const useGithubContributors = (): GithubContributorHookInterface => {
     setContributors(adaptGithubContributors(data));
     setIsLoading(false);
   }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   return {
     isLoading,

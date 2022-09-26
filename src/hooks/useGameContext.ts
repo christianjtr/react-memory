@@ -10,4 +10,4 @@ const useGameContext = (): GameContextType => {
   return gameContext;
 };
 
-export { useGameContext };
+export default useGameContext;

@@ -1,18 +1,20 @@
-type GameConfig = {
-    timeInSeconds: number;
-    pairsOfCards: number;
-}
+import { Contributor, GameConfig } from '../../types';
 
 export interface GameStateInterface {
+    cards: Contributor[];
     score: number;
-    // addToScore: () => void;
-    // initGame: (config: GameConfig) => void;
+    config: GameConfig; 
 }
 
+const defaultConfig: GameConfig = {
+  timeInSeconds: 60,
+  pairsOfCards: 6
+};
+
 const GameState: GameStateInterface = {
+  cards: [],
   score: 0,
-  // addToScore: () => ({}),
-  // initGame: (config: GameConfig) => ({}),
+  config: defaultConfig,
 };
 
 export default GameState;

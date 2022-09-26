@@ -1,11 +1,12 @@
 import React, { useReducer } from 'react';
 
 import GameState, { GameStateInterface } from './state';
-import GameActions, { GameActionsInterface } from './actions';
+import GameActions from './actions';
+import { GameActionTypes } from './action-types';
 
 export type GameContextType = {
   state: GameStateInterface;
-  dispatch: React.Dispatch<GameActionsInterface>;
+  dispatch: React.Dispatch<GameActionTypes>;
 };
 
 type GameProviderProps = {

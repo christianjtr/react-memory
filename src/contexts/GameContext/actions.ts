@@ -1,22 +1,27 @@
 import { GameStateInterface } from './state';
-import { GameActionTypes } from './action-types';
+import { GameActionTypes, GAME_ACTION_TYPES } from './action-types';
 
-export interface GameActionsInterface {
-    action: GameActionTypes;
-    payload?: unknown;
-}
-
-const GameActions = (state: GameStateInterface, {action, payload}: GameActionsInterface): GameStateInterface => {
+const GameActions = (state: GameStateInterface, action: GameActionTypes): GameStateInterface => {
   switch(action.type) {
-  case 'ADD_TO_SCORE': {
-    const {score} = state;
+  case GAME_ACTION_TYPES.ADD_TO_SCORE: {
+    const { score } = state;
+    const { score: scoreToAdd } = action.payload;
     return {
       ...state,
-      score: score + 1,
+      score: score + scoreToAdd,
+    };
+  }
+  case GAME_ACTION_TYPES.INIT_GAME: {
+    const { config } = state;
+    const {cards: cardsToAdd, config: customConfig = undefined} = action.payload;
+    return {
+      ...state,
+      cards: cardsToAdd,
+      config: customConfig || config
     };
   }
   default: {
-    throw new Error(`Unhandled action type: ${action.type}`);
+    throw new Error('Unhandled action type');
   }
   }
 };
