@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { take, shuffle } from 'lodash';
 
 import { GameStateInterface } from './state';
 import { GameActionTypes, GAME_ACTION_TYPES } from './action-types';
@@ -21,12 +21,8 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
       ? customConfig?.pairsOfCards
       : config.pairsOfCards;
     
-    const selectionOfCards = _.chain(cards)
-      .shuffle()
-      .take(pairsOfCards)
-      .value();
-
-    const cardsToAdd = _.shuffle([...selectionOfCards, ...selectionOfCards]);
+    const selectionOfCards = take(shuffle(cards), pairsOfCards);
+    const cardsToAdd = shuffle([...selectionOfCards, ...selectionOfCards]);
 
     return {
       ...state,
