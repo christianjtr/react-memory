@@ -7,7 +7,7 @@ export interface GameStateInterface {
 }
 
 const defaultConfig: GameConfig = {
-  timeInSeconds: 60,
+  durationInSeconds: 60,
   pairsOfCards: 6
 };
 

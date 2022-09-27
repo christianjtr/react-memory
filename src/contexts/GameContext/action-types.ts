@@ -7,5 +7,4 @@ export enum GAME_ACTION_TYPES {
 
 export type GameActionTypes =
   | { type: GAME_ACTION_TYPES.ADD_TO_SCORE; payload: { score: number;} }
-  | { type: GAME_ACTION_TYPES.INIT_GAME; payload: {cards: Contributor[], config?: GameConfig} };
-
+  | { type: GAME_ACTION_TYPES.INIT_GAME; payload: { cards: Contributor[], config?: GameConfig } };

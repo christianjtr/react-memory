@@ -1,4 +1,4 @@
 export type GameConfig = {
-    timeInSeconds: number;
+    durationInSeconds: number;
     pairsOfCards: number;
 }

@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import { GameStateInterface } from './state';
 import { GameActionTypes, GAME_ACTION_TYPES } from './action-types';
 
@@ -13,11 +15,26 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
   }
   case GAME_ACTION_TYPES.INIT_GAME: {
     const { config } = state;
-    const {cards: cardsToAdd, config: customConfig = undefined} = action.payload;
+    const { cards, config: customConfig = undefined } = action.payload;
+
+    const pairsOfCards = (customConfig?.pairsOfCards && customConfig?.pairsOfCards%2 === 0) 
+      ? customConfig?.pairsOfCards
+      : config.pairsOfCards;
+    
+    const selectionOfCards = _.chain(cards)
+      .shuffle()
+      .take(pairsOfCards)
+      .value();
+
+    const cardsToAdd = _.shuffle([...selectionOfCards, ...selectionOfCards]);
+
     return {
       ...state,
       cards: cardsToAdd,
-      config: customConfig || config
+      config: { 
+        durationInSeconds: customConfig?.durationInSeconds || config.durationInSeconds, 
+        pairsOfCards 
+      }
     };
   }
   default: {
