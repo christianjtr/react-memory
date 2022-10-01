@@ -15,9 +15,13 @@ const Gameboard = (): React.ReactElement => {
 
   const { contributors, fetchData } = useGithubContributors();
 
+  const handleClickOnCard = (cardId: number): void => {
+    dispatch({ type: GAME_ACTION_TYPES.FACE_UP_CARD, payload: { cardId } });
+  };
+
   useEffect(() => {
     if (contributors.length > 0) {
-      dispatch({ type: GAME_ACTION_TYPES.INIT_GAME, payload: { cards: contributors } });
+      dispatch({ type: GAME_ACTION_TYPES.INIT_GAME, payload: { data: contributors } });
     }
   }, [contributors]);
 
@@ -31,7 +35,11 @@ const Gameboard = (): React.ReactElement => {
         <h1 className="my-5 text-3xl text-center">Github Memory</h1>
         <div className="grid grid-cols-4 gap-4 ">
           {cards.map((card, index) => (
-            <Card key={`${card.id}_${index}`} data={card} className="drop-shadow-md" />
+            <Card
+              key={`${card.data.id}_${index}`}
+              data={card}
+              onClick={handleClickOnCard}
+            />
           ))}
         </div>
         <div className="flex my-5">

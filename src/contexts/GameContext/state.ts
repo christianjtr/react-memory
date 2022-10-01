@@ -1,7 +1,7 @@
-import { Contributor, GameConfig } from '../../types';
+import { GameConfig, GameCard } from '../../types';
 
 export interface GameStateInterface {
-    cards: Contributor[];
+    cards: GameCard[];
     score: number;
     config: GameConfig; 
 }

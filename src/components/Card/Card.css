@@ -1,0 +1,22 @@
+.memory-card {
+  -webkit-box-shadow: 0px 0px 1px 0px rgba(128, 128, 128, 1);
+  -moz-box-shadow: 0px 0px 1px 0px rgba(128, 128, 128, 1);
+  box-shadow: 0px 0px 1px 0px rgba(128, 128, 128, 1);
+  border-radius: 50px;
+}
+
+.memory-card > .memory-card__image {
+  border-radius: inherit;
+}
+
+.memory-card > .memory-card__overlay {
+  background: LightSteelBlue;
+}
+
+.memory-card__overlay:hover {
+  border: 5px solid CadetBlue;
+}
+
+.memory-card__overlay img {
+  opacity: 0;
+}
