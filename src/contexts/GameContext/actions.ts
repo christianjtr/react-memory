@@ -1,31 +1,46 @@
-import { take, shuffle } from 'lodash';
+import { take, shuffle, find } from 'lodash';
 
 import { GameStateInterface } from './state';
 import { GameActionTypes, GAME_ACTION_TYPES } from './action-types';
 
 const GameActions = (state: GameStateInterface, action: GameActionTypes): GameStateInterface => {
   switch(action.type) {
-  case GAME_ACTION_TYPES.ADD_TO_SCORE: {
-    const { score } = state;
-    const { score: scoreToAdd } = action.payload;
-    return {
-      ...state,
-      score: score + scoreToAdd,
-    };
-  }
   case GAME_ACTION_TYPES.FACE_UP_CARD: {
     const { cards } = state;
     const { cardId } = action.payload;
 
     const copyOfCards = cards.map((card) => {
       return card.id === cardId 
-        ? {...card, isFaceDown: false} 
+        ? { ...card, isFaceDown: false } 
         : card;
     });
+
+    return {
+      ...state,
+      cards: copyOfCards,
+    };
+  }
+  case GAME_ACTION_TYPES.FACE_DOWN_CARDS: {
+    const { cards, foundPairs } = state;
+    
+    const copyOfCards = cards
+      .map((card) => ({...card, isFaceDown: !foundPairs.includes(card.data.id)}));
     
     return {
       ...state,
       cards: copyOfCards,
+    };
+  }
+  case GAME_ACTION_TYPES.ADD_TO_FOUND_PAIRS: {
+    const { foundPairs, config: { scoreMultiplier } } = state;
+    const { cardId } = action.payload;
+    
+    const copyOfFoundPairs = [...foundPairs, cardId];
+    
+    return {
+      ...state,
+      foundPairs: copyOfFoundPairs,
+      score: scoreMultiplier * copyOfFoundPairs.length,
     };
   }
   case GAME_ACTION_TYPES.INIT_GAME: {
@@ -49,7 +64,10 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
       cards: cardsToAdd,
       config: { 
         durationInSeconds: customConfig?.durationInSeconds || config.durationInSeconds, 
-        pairsOfCards 
+        scoreMultiplier: customConfig?.scoreMultiplier || config.scoreMultiplier,
+        timeUntilFaceDownCardsInSeconds: customConfig?.timeUntilFaceDownCardsInSeconds || config.timeUntilFaceDownCardsInSeconds,
+        pairsOfCards,
+         
       }
     };
   }

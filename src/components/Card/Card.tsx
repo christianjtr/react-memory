@@ -4,14 +4,14 @@ import { GameCard } from '../../types';
 
 interface CardProps {
   data: GameCard;
-  onClick: (cardId: number) => void;
+  onClick: (gameCardId: number, uniqueId: number) => void;
 }
 
 const Card: React.FC<CardProps> = (props: CardProps): React.ReactElement => {
   const {
     data: {
-      data: { loginName, avatarURL },
-      id,
+      data: { id, loginName, avatarURL },
+      id: gameCardId,
       isFaceDown,
     },
     onClick: onClickCardCallback,
@@ -24,7 +24,7 @@ const Card: React.FC<CardProps> = (props: CardProps): React.ReactElement => {
       role="button"
       aria-pressed={false}
       title="Click to flip the card"
-      onClick={(): void => onClickCardCallback(id)}>
+      onClick={(): void => onClickCardCallback(gameCardId, id)}>
       <div
         className={`memory-card__image rounded-lg ${
           isFaceDown && 'memory-card__overlay'

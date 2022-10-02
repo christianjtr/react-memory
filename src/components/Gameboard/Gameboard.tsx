@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useGameContext, useGithubContributors } from '../../hooks';
+import { useGameContext, useGithubContributors, useGame } from '../../hooks';
 import { GAME_ACTION_TYPES } from '../../contexts/action-types';
 import Card from '../Card/Card';
 
@@ -9,14 +9,19 @@ const Gameboard = (): React.ReactElement => {
     state: {
       cards,
       score,
-      config: { durationInSeconds },
+      config: { durationInSeconds, timeUntilFaceDownCardsInSeconds },
     },
   } = useGameContext();
 
+  const { isValidGameMove, gameCardIds, addGameCardId, faceDownCards, initGameMove } =
+    useGame();
   const { contributors, fetchData } = useGithubContributors();
 
-  const handleClickOnCard = (cardId: number): void => {
-    dispatch({ type: GAME_ACTION_TYPES.FACE_UP_CARD, payload: { cardId } });
+  const handleClickOnCard = (gameCardId: number, uniqueId: number): void => {
+    addGameCardId(uniqueId);
+    if (isValidGameMove === undefined) {
+      dispatch({ type: GAME_ACTION_TYPES.FACE_UP_CARD, payload: { cardId: gameCardId } });
+    }
   };
 
   useEffect(() => {
@@ -24,6 +29,20 @@ const Gameboard = (): React.ReactElement => {
       dispatch({ type: GAME_ACTION_TYPES.INIT_GAME, payload: { data: contributors } });
     }
   }, [contributors]);
+
+  useEffect(() => {
+    if (isValidGameMove) {
+      const [cardId] = gameCardIds;
+      dispatch({ type: GAME_ACTION_TYPES.ADD_TO_FOUND_PAIRS, payload: { cardId } });
+    }
+    if (isValidGameMove === false) {
+      faceDownCards(
+        () => dispatch({ type: GAME_ACTION_TYPES.FACE_DOWN_CARDS }),
+        timeUntilFaceDownCardsInSeconds,
+      );
+    }
+    initGameMove();
+  }, [isValidGameMove]);
 
   useEffect(() => {
     fetchData();
