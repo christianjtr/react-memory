@@ -40,7 +40,7 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
     return {
       ...state,
       foundPairs: copyOfFoundPairs,
-      score: scoreMultiplier * copyOfFoundPairs.length,
+      score: (scoreMultiplier as number) * copyOfFoundPairs.length,
     };
   }
   case GAME_ACTION_TYPES.SET_GAME_OVER: {
@@ -72,12 +72,13 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
       data: item,
       isFaceDown: true,
     }));
-    
+
     return {
       ...state,
       cards: cardsToAdd,
       foundPairs: [],
       isGameOver: false,
+      timer: customConfig?.durationInSeconds || config.durationInSeconds as number, 
       score: 0,
       config: { 
         durationInSeconds: customConfig?.durationInSeconds || config.durationInSeconds, 

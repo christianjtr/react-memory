@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react';
-import { useGameContext, useGame } from '../../hooks';
+import { useGameContext, useGame, useGithubContributors } from '../../hooks';
 import Card from '../Card/Card';
+import Modal from '../Modal/Modal';
 import GameBoardHeader from '../GameBoardHeader/GameBoardHeader';
 import GameBoardFooter from '../GameBoardFooter/GameBoardFooter';
 
-const Gameboard = (): React.ReactElement => {
+const Gameboard = (): React.ReactElement | null => {
   const {
     state: { cards },
   } = useGameContext();
 
+  const { contributors, isLoading, fetchData } = useGithubContributors();
   const { isValidGameMove, gameCardIds, ...GameFunctionalities } = useGame();
 
   const handleClickOnCard = (gameCardId: number, uniqueId: number): void => {
@@ -19,8 +21,7 @@ const Gameboard = (): React.ReactElement => {
   useEffect(() => {
     if (typeof isValidGameMove === 'boolean') {
       if (isValidGameMove) {
-        const [cardId] = gameCardIds;
-        GameFunctionalities.addToFoundPairs(cardId);
+        GameFunctionalities.addToFoundPairs(gameCardIds[0]);
       } else {
         GameFunctionalities.faceDownCards();
       }
@@ -28,9 +29,21 @@ const Gameboard = (): React.ReactElement => {
     }
   }, [isValidGameMove]);
 
+  const initGameboard = (): void => {
+    fetchData();
+  };
+
   useEffect(() => {
-    GameFunctionalities.startGame();
+    if (contributors.length > 0) {
+      GameFunctionalities.startGame(contributors);
+    }
+  }, [contributors]);
+
+  useEffect(() => {
+    initGameboard();
   }, []);
+
+  if (isLoading) return null;
 
   return (
     <div className="container mx-auto flex h-screen">
@@ -47,6 +60,7 @@ const Gameboard = (): React.ReactElement => {
         </div>
         <GameBoardFooter />
       </div>
+      <Modal onOk={initGameboard} />
     </div>
   );
 };

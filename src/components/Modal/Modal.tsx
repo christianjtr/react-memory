@@ -1,18 +1,18 @@
 import React from 'react';
 import './Modal.css';
 
-import { useGame, useGameContext } from '../../hooks';
+import { useGameContext } from '../../hooks';
 
-const Modal: React.FC = (): React.ReactElement | null => {
+export interface ModalProps {
+  onOk: () => void;
+}
+
+const Modal: React.FC<ModalProps> = (props: ModalProps): React.ReactElement | null => {
+  const { onOk: handleOnOkCallBack } = props;
+
   const {
     state: { isGameOver, score },
   } = useGameContext();
-
-  const { startGame } = useGame();
-
-  const handleOnClickStartGame = (): void => {
-    startGame();
-  };
 
   if (!isGameOver) return null;
 
@@ -41,7 +41,7 @@ const Modal: React.FC = (): React.ReactElement | null => {
               className="button"
               title="New game!"
               aria-label="New game!"
-              onClick={handleOnClickStartGame}>
+              onClick={handleOnOkCallBack}>
               New game!
             </button>
           </div>
