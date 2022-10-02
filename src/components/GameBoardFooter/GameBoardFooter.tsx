@@ -10,7 +10,7 @@ const GameBoardFooter = (): React.ReactElement => {
   } = useGameContext();
 
   return (
-    <div className="flex my-5">
+    <div className="flex my-5 text-xl">
       <div className="w-1/2 font-medium">{`Time: ${durationInSeconds}`}</div>
       <div className="w-1/2 text-right font-medium">{`Score: ${score}`}</div>
     </div>

@@ -43,6 +43,12 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
       score: scoreMultiplier * copyOfFoundPairs.length,
     };
   }
+  case GAME_ACTION_TYPES.SET_GAME_OVER: {
+    return {
+      ...state,
+      isGameOver: true,
+    };
+  }
   case GAME_ACTION_TYPES.INIT_GAME: {
     const { config } = state;
     const { data, config: customConfig = undefined } = action.payload;
@@ -62,6 +68,8 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
     return {
       ...state,
       cards: cardsToAdd,
+      foundPairs: [],
+      isGameOver: false,
       config: { 
         durationInSeconds: customConfig?.durationInSeconds || config.durationInSeconds, 
         scoreMultiplier: customConfig?.scoreMultiplier || config.scoreMultiplier,

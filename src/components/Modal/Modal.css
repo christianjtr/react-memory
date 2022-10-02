@@ -1,0 +1,36 @@
+.modal {
+  @apply fixed z-10 overflow-y-auto top-0 w-full left-0;
+}
+
+.modal > .modal__contentainer-wrapper {
+  @apply flex items-center justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0;
+}
+
+.modal .modal__center-anchor {
+  @apply sm:inline-block sm:align-middle sm:h-screen hidden;
+}
+
+.modal .modal__overlay {
+  @apply fixed inset-0 transition-opacity;
+}
+
+.modal .modal__overlay > .modal__overlay-mask {
+  @apply absolute inset-0 bg-gray-900 opacity-75;
+}
+
+.modal .modal__container {
+  @apply inline-block origin-center bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full;
+}
+
+.modal .modal__body,
+.modal__footer {
+  @apply px-4;
+}
+
+.modal .modal__body {
+  @apply bg-white pt-5 pb-4 sm:p-6 sm:pb-4;
+}
+
+.modal .button {
+  @apply bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded;
+}

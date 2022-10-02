@@ -5,6 +5,7 @@ export interface GameStateInterface {
     foundPairs: Contributor['id'][];
     score: number;
     config: GameConfig; 
+    isGameOver: boolean;
 }
 
 const defaultConfig: GameConfig = {
@@ -19,6 +20,7 @@ const GameState: GameStateInterface = {
   foundPairs: [],
   score: 0,
   config: defaultConfig,
+  isGameOver: false,
 };
 
 export default GameState;

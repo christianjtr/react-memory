@@ -1,11 +1,11 @@
 import React from 'react';
 
-export interface GameBoardHeaderInterface {
+export interface GameBoardHeaderProps {
   title?: string;
 }
 
-const GameBoardHeader: React.FC<GameBoardHeaderInterface> = (
-  props: GameBoardHeaderInterface,
+const GameBoardHeader: React.FC<GameBoardHeaderProps> = (
+  props: GameBoardHeaderProps,
 ): React.ReactElement => {
   const { title = 'Github Memory' } = props;
 
