@@ -4,6 +4,7 @@ export interface GameStateInterface {
     cards: GameCard[];
     foundPairs: Contributor['id'][];
     score: number;
+    timer: number;
     config: GameConfig; 
     isGameOver: boolean;
 }
@@ -19,6 +20,7 @@ const GameState: GameStateInterface = {
   cards: [],
   foundPairs: [],
   score: 0,
+  timer: defaultConfig.durationInSeconds,
   config: defaultConfig,
   isGameOver: false,
 };

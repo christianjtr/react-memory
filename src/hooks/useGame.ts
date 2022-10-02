@@ -18,10 +18,12 @@ interface GameHookInterface {
 const useGame = (): GameHookInterface => {
 
   const NUMBER_OF_CARDS_TO_VALIDATE = 2;
+  let INTERVAL: number | undefined;
 
   const { contributors, fetchData } = useGithubContributors();
-  const { dispatch, state: { config: { timeUntilFaceDownCardsInSeconds, pairsOfCards }, foundPairs } } = useGameContext();
+  const { dispatch, state: { config: { timeUntilFaceDownCardsInSeconds, pairsOfCards, durationInSeconds }, foundPairs } } = useGameContext();
   
+  const [gameTimer, setGameTimer] = useState<number>(durationInSeconds);
   const [isValidGameMove, setIsValidGameMove] = useState<boolean | undefined>(undefined);
   const [gameCardIds, setGameCardIds] = useState<number[]>([]);
   const [gameConfig, setGameConfig] = useState<GameConfig | undefined>(undefined);
@@ -50,9 +52,27 @@ const useGame = (): GameHookInterface => {
     dispatch({ type: GAME_ACTION_TYPES.ADD_TO_FOUND_PAIRS, payload: { cardId } });
   };
 
+  const clearGameInTerval = (): void => {
+    INTERVAL = undefined;
+    clearInterval(INTERVAL);
+    dispatch({type: GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME, payload: { timer: durationInSeconds } });
+    setGameTimer(durationInSeconds);
+  };
+
   const initGameMove = (): void => {
     setGameCardIds([]);
     setIsValidGameMove(undefined);
+  };
+
+  const startTimer = (): void => {
+    let timeLeft = durationInSeconds;
+    INTERVAL = setInterval(() => {
+      if(timeLeft <= 0) clearGameInTerval();
+      else {
+        timeLeft -= 1;
+        setGameTimer(timeLeft);
+      }
+    }, 1000) as unknown as number;
   };
 
   const startGame = async (config?: GameConfig): Promise<void> => {
@@ -63,10 +83,10 @@ const useGame = (): GameHookInterface => {
   useEffect(() => {
     if(contributors.length > 0) {
       dispatch({ type: GAME_ACTION_TYPES.INIT_GAME, payload: { data: contributors, config: gameConfig } });
+      startTimer();
     }
   }, [contributors]);
-  
-  
+
   useEffect(() => {
     if(gameCardIds.length === NUMBER_OF_CARDS_TO_VALIDATE) {
       validateGameMove();
@@ -74,10 +94,13 @@ const useGame = (): GameHookInterface => {
   }, [gameCardIds]);
 
   useEffect(() => {
-    if(foundPairs.length === pairsOfCards) {
+    if(gameTimer === 0 || foundPairs.length === pairsOfCards) {
+      clearGameInTerval();
       dispatch({ type: GAME_ACTION_TYPES.SET_GAME_OVER });
+    } else {
+      dispatch({type: GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME, payload: { timer: gameTimer} });
     }
-  }, [foundPairs]);
+  }, [foundPairs, gameTimer]);
 
   return {
     isValidGameMove,

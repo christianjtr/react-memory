@@ -49,6 +49,14 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
       isGameOver: true,
     };
   }
+  case GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME: {
+    const { timer } = action.payload;
+    
+    return {
+      ...state,
+      timer,
+    };
+  }
   case GAME_ACTION_TYPES.INIT_GAME: {
     const { config } = state;
     const { data, config: customConfig = undefined } = action.payload;
@@ -70,6 +78,7 @@ const GameActions = (state: GameStateInterface, action: GameActionTypes): GameSt
       cards: cardsToAdd,
       foundPairs: [],
       isGameOver: false,
+      score: 0,
       config: { 
         durationInSeconds: customConfig?.durationInSeconds || config.durationInSeconds, 
         scoreMultiplier: customConfig?.scoreMultiplier || config.scoreMultiplier,
