@@ -1,4 +1,4 @@
-import { take, shuffle, find } from 'lodash';
+import { take, shuffle } from 'lodash';
 
 import { GameStateInterface } from './state';
 import { GameActionTypes, GAME_ACTION_TYPES } from './action-types';

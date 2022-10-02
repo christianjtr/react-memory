@@ -2,23 +2,24 @@ import React, { useEffect } from 'react';
 import { useGameContext, useGithubContributors, useGame } from '../../hooks';
 import { GAME_ACTION_TYPES } from '../../contexts/action-types';
 import Card from '../Card/Card';
+import GameBoardHeader from '../GameBoardHeader/GameBoardHeader';
+import GameBoardFooter from '../GameBoardFooter/GameBoardFooter';
 
 const Gameboard = (): React.ReactElement => {
   const {
     dispatch,
     state: {
       cards,
-      score,
-      config: { durationInSeconds, timeUntilFaceDownCardsInSeconds },
+      config: { timeUntilFaceDownCardsInSeconds },
     },
   } = useGameContext();
 
-  const { isValidGameMove, gameCardIds, addGameCardId, faceDownCards, initGameMove } =
-    useGame();
+  const { isValidGameMove, gameCardIds, ...GameFunctionalities } = useGame();
+
   const { contributors, fetchData } = useGithubContributors();
 
   const handleClickOnCard = (gameCardId: number, uniqueId: number): void => {
-    addGameCardId(uniqueId);
+    GameFunctionalities.addGameCardId(uniqueId);
     if (isValidGameMove === undefined) {
       dispatch({ type: GAME_ACTION_TYPES.FACE_UP_CARD, payload: { cardId: gameCardId } });
     }
@@ -31,17 +32,18 @@ const Gameboard = (): React.ReactElement => {
   }, [contributors]);
 
   useEffect(() => {
-    if (isValidGameMove) {
-      const [cardId] = gameCardIds;
-      dispatch({ type: GAME_ACTION_TYPES.ADD_TO_FOUND_PAIRS, payload: { cardId } });
+    if (typeof isValidGameMove === 'boolean') {
+      if (isValidGameMove) {
+        const [cardId] = gameCardIds;
+        dispatch({ type: GAME_ACTION_TYPES.ADD_TO_FOUND_PAIRS, payload: { cardId } });
+      } else {
+        GameFunctionalities.faceDownCards(
+          () => dispatch({ type: GAME_ACTION_TYPES.FACE_DOWN_CARDS }),
+          timeUntilFaceDownCardsInSeconds,
+        );
+      }
+      GameFunctionalities.initGameMove();
     }
-    if (isValidGameMove === false) {
-      faceDownCards(
-        () => dispatch({ type: GAME_ACTION_TYPES.FACE_DOWN_CARDS }),
-        timeUntilFaceDownCardsInSeconds,
-      );
-    }
-    initGameMove();
   }, [isValidGameMove]);
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const Gameboard = (): React.ReactElement => {
   return (
     <div className="container mx-auto flex h-screen">
       <div className="w-3/5 m-auto">
-        <h1 className="my-5 text-3xl text-center">Github Memory</h1>
+        <GameBoardHeader />
         <div className="grid grid-cols-4 gap-4 ">
           {cards.map((card, index) => (
             <Card
@@ -61,10 +63,7 @@ const Gameboard = (): React.ReactElement => {
             />
           ))}
         </div>
-        <div className="flex my-5">
-          <div className="w-1/2 font-medium">{`Time: ${durationInSeconds}`}</div>
-          <div className="w-1/2 text-right font-medium">{`Score: ${score}`}</div>
-        </div>
+        <GameBoardFooter />
       </div>
     </div>
   );

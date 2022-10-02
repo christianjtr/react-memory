@@ -17,7 +17,6 @@ const useGame = (): GameHookInterface => {
 
   const validateGameMove = (): void => {
     const [firstCard, secondCard] = gameCardIds;
-    console.log('IS VALID:', firstCard === secondCard);
     setIsValidGameMove(firstCard === secondCard);
   };
 
