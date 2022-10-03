@@ -1,35 +1,15 @@
 import { GithubContributor } from '../../src/types/Contributor';
+import response from '../../__responses__/githubcontributors';
+
 import { fetchRepositoryContributors, BASE_API_URL } from '../../src/services/github.services';
-
-
-const response: GithubContributor[] = [
-  { 
-    'login': 'zpao',
-    'id': 8445,
-    'node_id': 'MDQ6VXNlcjg0NDU=',
-    'avatar_url': 'https://avatars.githubusercontent.com/u/8445?v=4',
-    'gravatar_id': '',
-    'url': 'https://api.github.com/users/zpao',
-    'html_url': 'https://github.com/zpao',
-    'followers_url': 'https://api.github.com/users/zpao/followers',
-    'following_url': 'https://api.github.com/users/zpao/following{/other_user}',
-    'gists_url': 'https://api.github.com/users/zpao/gists{/gist_id}',
-    'starred_url': 'https://api.github.com/users/zpao/starred{/owner}{/repo}',
-    'subscriptions_url': 'https://api.github.com/users/zpao/subscriptions',
-    'organizations_url': 'https://api.github.com/users/zpao/orgs',
-    'repos_url': 'https://api.github.com/users/zpao/repos',
-    'events_url': 'https://api.github.com/users/zpao/events{/privacy}',
-    'received_events_url': 'https://api.github.com/users/zpao/received_events',
-    'type': 'User',
-    'site_admin': false,
-    'contributions': 1778
-  }];
 
 describe('github.services', () => {
 
+  const githubContributors: GithubContributor[] = response;
+
   global.fetch = jest.fn(() =>
     Promise.resolve({
-      json: () => Promise.resolve(response),
+      json: () => Promise.resolve(githubContributors),
     }),
   ) as jest.Mock;  
   
@@ -42,7 +22,7 @@ describe('github.services', () => {
     
       const result = await fetchRepositoryContributors();
     
-      expect(result).toStrictEqual(response);
+      expect(result).toStrictEqual(githubContributors);
       expect(fetch).toHaveBeenCalledWith(`${BASE_API_URL}/facebook/react/contributors`);
     });
     
@@ -50,7 +30,7 @@ describe('github.services', () => {
         
       const result = await fetchRepositoryContributors('owner', 'repository');
     
-      expect(result).toStrictEqual(response);
+      expect(result).toStrictEqual(githubContributors);
       expect(fetch).toHaveBeenCalledWith(`${BASE_API_URL}/owner/repository/contributors`);
     });
 
