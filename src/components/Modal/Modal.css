@@ -7,7 +7,7 @@
 }
 
 .modal .modal__center-anchor {
-  @apply sm:inline-block sm:align-middle sm:h-screen hidden;
+  @apply sm:inline-block align-middle h-screen;
 }
 
 .modal .modal__overlay {
@@ -19,7 +19,7 @@
 }
 
 .modal .modal__container {
-  @apply inline-block origin-center bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full;
+  @apply inline-block origin-center bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:align-middle sm:max-w-lg w-1/2;
 }
 
 .modal .modal__body,

@@ -9,9 +9,9 @@ const GameBoardFooter = (): React.ReactElement | null => {
   if (timer === undefined) return null;
 
   return (
-    <div className="flex my-5 text-xl">
-      <div className="w-1/2 font-medium">{`Time: ${timer}`}</div>
-      <div className="w-1/2 text-right font-medium">{`Score: ${score}`}</div>
+    <div className="md:flex w-full my-5 text-xl font-med">
+      <div className="md:flex-1">{`Time: ${timer}`}</div>
+      <div className="md:flex-1 md:text-right">{`Score: ${score}`}</div>
     </div>
   );
 };

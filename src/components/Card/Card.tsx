@@ -5,6 +5,7 @@ import { GameCard } from '../../types';
 interface CardProps {
   data: GameCard;
   onClick: (gameCardId: number, uniqueId: number) => void;
+  className?: string;
 }
 
 const Card: React.FC<CardProps> = (props: CardProps): React.ReactElement => {
@@ -15,11 +16,12 @@ const Card: React.FC<CardProps> = (props: CardProps): React.ReactElement => {
       isFaceDown,
     },
     onClick: onClickCardCallback,
+    className = '',
   } = props;
 
   return (
     <div
-      className="memory-card border-solid border-1 border-grey-200 rounded-lg"
+      className={`memory-card border-solid border-1 border-grey-200 rounded-lg ${className}`}
       tabIndex={0}
       role="button"
       aria-pressed={false}

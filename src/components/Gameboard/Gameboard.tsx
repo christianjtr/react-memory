@@ -47,9 +47,9 @@ const Gameboard = (): React.ReactElement | null => {
 
   return (
     <div className="container mx-auto flex h-screen">
-      <div className="w-3/5 m-auto">
+      <div className="w-4/5 m-auto">
         <GameBoardHeader />
-        <div className="grid grid-cols-4 gap-4 ">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
           {cards.map((card, index) => (
             <Card
               key={`${card.data.id}_${index}`}
