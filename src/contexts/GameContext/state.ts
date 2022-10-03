@@ -20,7 +20,7 @@ const GameState: GameStateInterface = {
   cards: [],
   foundPairs: [],
   score: 0,
-  timer: defaultConfig.durationInSeconds,
+  timer: defaultConfig.durationInSeconds as number,
   config: defaultConfig,
   isGameOver: false,
 };
