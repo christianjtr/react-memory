@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 import {GithubContributor} from '../types/Contributor';
 
-const BASE_API_URL = 'https://api.github.com/repos';
+export const BASE_API_URL = 'https://api.github.com/repos';
 
 /**
  * @summary Get contributors given the specified owner/repository
@@ -15,7 +15,6 @@ async function fetchRepositoryContributors(owner = 'facebook', repositoryName = 
     const contribuitors = response.json();
     return contribuitors;
   } catch(error) {
-    // TODO: Add HttpError handler...
     throw error;
   }
 }
