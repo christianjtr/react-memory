@@ -49,7 +49,7 @@ npm run lint
 npm run lint:fix
 ```
 
-### Lints and fixes files
+### Run tests
 
 ```
 npm run test
