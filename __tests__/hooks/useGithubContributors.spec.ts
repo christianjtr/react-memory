@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { Contributor } from '../../src/types/Contributor';
 import { fetchRepositoryContributors } from '../../src/services/github.services';
 import { adaptGithubContributors } from '../../src/adapters/contributor.adapter';
