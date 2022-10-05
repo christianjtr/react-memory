@@ -2,7 +2,7 @@ import React from 'react';
 import './Card.css';
 import { GameCard } from '../../types';
 
-interface CardProps {
+export interface CardProps {
   data: GameCard;
   onClick: (gameCardId: number, uniqueId: number) => void;
   className?: string;

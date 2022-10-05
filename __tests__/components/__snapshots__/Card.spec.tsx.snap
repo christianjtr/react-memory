@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Card component should render the component correctly 1`] = `
+<div
+  aria-pressed={false}
+  className="memory-card border-solid border-1 border-grey-200 rounded-lg dummy-class"
+  onClick={[Function]}
+  role="button"
+  tabIndex={0}
+  title="Click to flip the card"
+>
+  <div
+    className="memory-card__image rounded-lg memory-card__overlay"
+  >
+    <img
+      alt="Contributor"
+      className="rounded-lg"
+      src="dummy-url"
+    />
+  </div>
+</div>
+`;
