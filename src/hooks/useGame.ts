@@ -14,10 +14,11 @@ interface GameHookInterface {
     startGame: (data: Contributor[], config?: GameConfig) => Promise<void>;
 }
 
+let INTERVAL: number | undefined;
+
 const useGame = (): GameHookInterface => {
 
   const NUMBER_OF_CARDS_TO_VALIDATE = 2;
-  let INTERVAL: number | undefined;
 
   const { 
     dispatch, 
@@ -64,14 +65,16 @@ const useGame = (): GameHookInterface => {
   };
 
   const clearGameInterval = (): void => {
-    clearInterval(INTERVAL);
-    INTERVAL = undefined;
+    if(INTERVAL) {
+      clearInterval(INTERVAL);
+      INTERVAL = undefined;
+    }
   };
   
   const startTimer = (): void => {
     let timeLeft = gameTimer as number;
     INTERVAL = setInterval(() => {
-      if(timeLeft <= 0) clearGameInterval(); 
+      if(timeLeft <= 0) return;
       else {
         timeLeft -= 1;
         setGameTimer(timeLeft);
@@ -79,31 +82,34 @@ const useGame = (): GameHookInterface => {
     }, 1000) as unknown as number;
   };
 
-  const startGame = async (data: Contributor[], config?: GameConfig): Promise<void> => {
+  const endGame = (): void => {
     clearGameInterval();
+    dispatch({ type: GAME_ACTION_TYPES.SET_GAME_OVER });
+    dispatch({ type: GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME, payload: { timer: durationInSeconds as number } });
+  };
+
+  const startGame = async (data: Contributor[], config?: GameConfig): Promise<void> => {
     dispatch({ type: GAME_ACTION_TYPES.INIT_GAME, payload: { data, config } });
     setGameTimer(config?.durationInSeconds || durationInSeconds);
   };
 
   useEffect(() => {
-    if(gameCardIds.length === NUMBER_OF_CARDS_TO_VALIDATE) {
-      validateGameMove();
-    }
+    if(gameCardIds.length === NUMBER_OF_CARDS_TO_VALIDATE) validateGameMove();
   }, [gameCardIds]);
 
   useEffect(() => {
-    if(typeof gameTimer === 'number' && !INTERVAL) startTimer();
-  }, [gameTimer]);
+    if(foundPairs.length === pairsOfCards) endGame();
+  }, [foundPairs]);
 
   useEffect(() => {
-    if(foundPairs.length === pairsOfCards || typeof gameTimer === 'number' && gameTimer === 0) {
-      clearGameInterval();
-      dispatch({ type: GAME_ACTION_TYPES.SET_GAME_OVER });
-      dispatch({ type: GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME, payload: { timer: 0 } });  
-    } else {
-      dispatch({type: GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME, payload: { timer: gameTimer as number } });  
+    if(typeof gameTimer === 'number') {
+      if(!INTERVAL) startTimer();
+      if(gameTimer === 0) endGame();
+      else {
+        dispatch({type: GAME_ACTION_TYPES.SET_COUNT_DOWN_TIME, payload: { timer: gameTimer as number } });    
+      }
     }
-  }, [foundPairs, gameTimer]);
+  }, [gameTimer]);
 
   return {
     isValidGameMove,

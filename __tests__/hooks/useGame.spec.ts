@@ -135,7 +135,6 @@ describe('useGame custom hook', () => {
     
     it('should execute the function properly', () => {
       
-      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
       const dummyData = Array.from(Array(6).keys()).map((i) => ({id: i, loginName: 'name', avatarURL: 'dummy-url'}));
       
       act(() => {
@@ -143,10 +142,7 @@ describe('useGame custom hook', () => {
       });
 
       expect(dispatchMock).toHaveBeenCalled();
-      expect(clearIntervalSpy).toHaveBeenCalled();
-      clearIntervalSpy.mockClear();
       
-
     });
   });
 
