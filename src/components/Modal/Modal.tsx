@@ -38,6 +38,7 @@ const Modal: React.FC<ModalProps> = (props: ModalProps): React.ReactElement | nu
             </p>
             <p className="my-5">{`Score: ${score}`}</p>
             <button
+              id="modal-button"
               className="button"
               title="New game!"
               aria-label="New game!"

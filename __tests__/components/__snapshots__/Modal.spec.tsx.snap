@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modal component should render the component correctly 1`] = `
+<div
+  className="modal"
+  id="modal"
+>
+  <div
+    className="modal__contentainer-wrapper"
+  >
+    <div
+      className="modal__overlay"
+    >
+      <div
+        className="modal__overlay-mask"
+      />
+    </div>
+    <span
+      className="modal__center-anchor"
+    >
+      ​
+    </span>
+    <div
+      aria-labelledby="modal-headline"
+      aria-modal="true"
+      className="modal__container"
+      role="dialog"
+    >
+      <div
+        className="modal__body text-center text-2xl"
+      >
+        <p>
+          <span
+            className="text-center text-5xl"
+          >
+            GAME
+            <br />
+            OVER
+          </span>
+        </p>
+        <p
+          className="my-5"
+        >
+          Score: 100
+        </p>
+        <button
+          aria-label="New game!"
+          className="button"
+          id="modal-button"
+          onClick={[MockFunction]}
+          title="New game!"
+        >
+          New game!
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
