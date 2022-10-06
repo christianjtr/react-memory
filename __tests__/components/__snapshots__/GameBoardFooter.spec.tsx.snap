@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GameBoardFooter component should render the component correctly 1`] = `
+<div
+  className="md:flex w-full my-5 text-xl font-med"
+>
+  <div
+    className="md:flex-1"
+  >
+    Time: 60
+  </div>
+  <div
+    className="md:flex-1 md:text-right"
+  >
+    Score: 100
+  </div>
+</div>
+`;
