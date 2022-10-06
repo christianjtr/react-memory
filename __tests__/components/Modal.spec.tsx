@@ -25,7 +25,7 @@ describe('Modal component', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the component correctly', async () => {
+  it('should render the component correctly', () => {
     const renderer = createRenderer();
     const component = renderer.render(<Modal onOk={handleOnOkCallBack} />);
 
@@ -33,7 +33,7 @@ describe('Modal component', () => {
     expect(renderer.getRenderOutput()).toMatchSnapshot();
   });
 
-  it('should check elements when the modal has been rendered', async () => {
+  it('should check elements when the modal has been rendered', () => {
     const { container } = render(<Modal onOk={handleOnOkCallBack} />);
 
     const modalElement = container.getElementsByClassName('modal');
@@ -43,7 +43,7 @@ describe('Modal component', () => {
     expect(scoreElement).toBeDefined();
   });
 
-  it('should call handleOnOkCallBack when clicking on the button', async () => {
+  it('should call handleOnOkCallBack when clicking on the button', () => {
     render(<Modal onOk={handleOnOkCallBack} />);
 
     const buttonElement = screen.getByRole('button');
