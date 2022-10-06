@@ -12,6 +12,7 @@
 
 .memory-card > .memory-card__overlay {
   background: LightSteelBlue;
+  height: inherit;
 }
 
 .memory-card__overlay:hover {
