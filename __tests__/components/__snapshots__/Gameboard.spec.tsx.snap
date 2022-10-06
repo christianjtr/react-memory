@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Gameboard component should render the component correctly 1`] = `
+<div
+  className="container mx-auto flex h-screen"
+>
+  <div
+    className="w-4/5 m-auto"
+  >
+    <GameBoardHeader />
+    <div
+      className="grid grid-cols-3 md:grid-cols-4 gap-4"
+    />
+    <GameBoardFooter />
+  </div>
+  <Modal
+    onOk={[Function]}
+  />
+</div>
+`;
