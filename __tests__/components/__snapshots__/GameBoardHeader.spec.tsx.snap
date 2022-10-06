@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GameBoardHeader component should render the component correctly 1`] = `
+<h1
+  className="my-5 text-3xl text-center"
+>
+  Github Memory
+</h1>
+`;
