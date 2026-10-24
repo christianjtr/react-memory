@@ -1,1 +1,1 @@
-export { GameBoardFooter } from './GameBoardFooter';
+export { GameBoardFooter, type GameBoardFooterProps } from './GameBoardFooter';
