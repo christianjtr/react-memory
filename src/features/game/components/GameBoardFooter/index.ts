@@ -1,0 +1,1 @@
+export { GameBoardFooter } from './GameBoardFooter';
