@@ -12,11 +12,7 @@ const STROKE = 9;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function TimerRing({
-  timer,
-  total,
-  isRunning,
-}: TimerRingProps): ReactElement {
+export function TimerRing({ timer, total, isRunning }: TimerRingProps): ReactElement {
   const prefersReducedMotion = useReducedMotion();
   const safeTotal = total > 0 ? total : 1;
   const ratio = Math.max(0, Math.min(1, timer / safeTotal));

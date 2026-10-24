@@ -7,7 +7,9 @@ export interface GameBoardFooterProps {
   bestScore?: number;
 }
 
-export function GameBoardFooter({ bestScore = 0 }: GameBoardFooterProps): ReactElement | null {
+export function GameBoardFooter({
+  bestScore = 0,
+}: GameBoardFooterProps): ReactElement | null {
   const { score, timer, status, config, foundContributorIds } = useGameState();
 
   if (status === 'idle') return null;

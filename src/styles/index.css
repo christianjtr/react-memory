@@ -1,8 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans:
-    'Nunito', 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Nunito', 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   --color-cream: #fff8f1;
   --color-ink: #241242;

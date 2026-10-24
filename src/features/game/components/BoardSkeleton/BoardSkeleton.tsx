@@ -6,9 +6,7 @@ export interface BoardSkeletonProps {
 
 export function BoardSkeleton({ count = 12 }: BoardSkeletonProps): ReactElement {
   return (
-    <div
-      aria-hidden="true"
-      className="grid grid-cols-3 gap-3 sm:gap-4 md:grid-cols-4">
+    <div aria-hidden="true" className="grid grid-cols-3 gap-3 sm:gap-4 md:grid-cols-4">
       {Array.from({ length: count }, (_, index) => (
         <div
           key={index}
