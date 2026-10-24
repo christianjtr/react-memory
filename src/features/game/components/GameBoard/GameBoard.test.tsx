@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameBoard } from '@/features/game/components';
 import { GameProvider } from '@/features/game/context/GameContext';
 import * as githubApi from '@/features/contributors/api/github';
+import { clearGithubContributorsCache } from '@/features/contributors/hooks/useGithubContributors';
+import type { Repository } from '@/features/contributors/types';
 import { githubContributorsFixture } from '@/test/fixtures/contributors';
 import type { GithubContributor } from '@/features/contributors/types';
 
@@ -34,6 +36,7 @@ function renderBoard() {
 describe('GameBoard', () => {
   beforeEach(() => {
     fetchRepositoryContributorsMock.mockReset();
+    clearGithubContributorsCache();
   });
 
   it('shows a loading state', async () => {
@@ -77,6 +80,31 @@ describe('GameBoard', () => {
     expect(screen.getAllByRole('button', { name: /pareja encontrada/ })).toHaveLength(2);
   });
 
+  it('restarts with the selected difficulty', async () => {
+    fetchRepositoryContributorsMock.mockResolvedValue([
+      ...githubContributorsFixture,
+      {
+        id: 7,
+        login: 'octo-one',
+        avatar_url: 'https://avatars.githubusercontent.com/u/7?v=4',
+      },
+      {
+        id: 8,
+        login: 'octo-two',
+        avatar_url: 'https://avatars.githubusercontent.com/u/8?v=4',
+      },
+    ]);
+    const user = userEvent.setup();
+
+    renderBoard();
+    await screen.findAllByRole('button', { name: /boca abajo/ });
+
+    await user.click(screen.getByRole('button', { name: /Difícil/ }));
+
+    expect(await screen.findAllByRole('button', { name: /boca abajo/ })).toHaveLength(16);
+    expect(screen.getByText('Time: 45')).toBeInTheDocument();
+  });
+
   it('completes the game and starts a new one', async () => {
     fetchRepositoryContributorsMock.mockResolvedValue(githubContributorsFixture);
     const user = userEvent.setup();
@@ -96,6 +124,15 @@ describe('GameBoard', () => {
     expect(within(dialog).getByText('Score: 600')).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('button', { name: 'New game!' }));
+
+    await waitFor(() => {
+      expect(fetchRepositoryContributorsMock).toHaveBeenCalledTimes(2);
+    });
+    const firstRepository = fetchRepositoryContributorsMock.mock
+      .calls[0]?.[0] as Repository;
+    const nextRepository = fetchRepositoryContributorsMock.mock
+      .calls[1]?.[0] as Repository;
+    expect(nextRepository).not.toEqual(firstRepository);
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

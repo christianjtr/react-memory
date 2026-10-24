@@ -53,6 +53,24 @@ describe('gameReducer', () => {
     });
   });
 
+  it('resets the current game before loading another repository', () => {
+    const startedState = selectCard(startGame(), 0);
+    const state = gameReducer(startedState, {
+      type: GAME_ACTION_TYPES.RESET_GAME,
+    });
+
+    expect(state).toMatchObject({
+      cards: [],
+      foundContributorIds: [],
+      selectedCardIds: [],
+      score: 0,
+      timer: config.durationInSeconds,
+      status: 'idle',
+      pendingResolution: 'none',
+      isGameOver: false,
+    });
+  });
+
   it('flips the first selected card', () => {
     const state = selectCard(startGame(), 0);
 

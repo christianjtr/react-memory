@@ -5,7 +5,10 @@ import {
   githubContributorsFixture,
 } from '@/test/fixtures/contributors';
 import type { GithubContributor } from '../types';
-import { useGithubContributors } from './useGithubContributors';
+import {
+  clearGithubContributorsCache,
+  useGithubContributors,
+} from './useGithubContributors';
 import * as githubApi from '../api/github';
 
 vi.mock('../api/github', async (importOriginal) => {
@@ -22,6 +25,7 @@ const fetchRepositoryContributorsMock = vi.mocked(githubApi.fetchRepositoryContr
 describe('useGithubContributors', () => {
   beforeEach(() => {
     fetchRepositoryContributorsMock.mockReset();
+    clearGithubContributorsCache();
   });
 
   it('starts with an empty state', () => {
@@ -53,6 +57,23 @@ describe('useGithubContributors', () => {
       isLoading: false,
       error: null,
     });
+  });
+
+  it('caches contributors by repository for the current session', async () => {
+    fetchRepositoryContributorsMock.mockResolvedValue(githubContributorsFixture);
+
+    const { result } = renderHook(() => useGithubContributors());
+    const repository = { owner: 'vercel', name: 'next.js' };
+
+    await act(async () => {
+      await result.current.fetchData(repository);
+    });
+    await act(async () => {
+      await result.current.fetchData(repository);
+    });
+
+    expect(fetchRepositoryContributorsMock).toHaveBeenCalledTimes(1);
+    expect(result.current.contributors).toEqual(contributorsFixture);
   });
 
   it('reports when no valid contributors are available', async () => {
