@@ -1,12 +1,12 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { motion } from 'motion/react';
 import { useGithubContributors } from '@/features/contributors/hooks/useGithubContributors';
+import type { Repository } from '@/features/contributors/types';
+import {
+  formatRepository,
+  getInitialRepository,
+  pickRandomRepository,
+} from '@/features/contributors/lib/repositories';
 import { BoardSkeleton } from '../BoardSkeleton/BoardSkeleton';
 import { Card } from '../Card/Card';
 import { DifficultySelector } from '../DifficultySelector/DifficultySelector';
@@ -23,19 +23,14 @@ import {
 } from '../../lib/difficulty';
 
 export function GameBoard(): ReactElement {
-  const {
-    cards,
-    status,
-    score,
-    isGameOver,
-    pendingResolution,
-    selectedCardIds,
-  } = useGameState();
+  const { cards, status, score, isGameOver, pendingResolution, selectedCardIds } =
+    useGameState();
   const { contributors, isLoading, error, fetchData } = useGithubContributors();
-  const { selectCard, startGame, isMovePending } = useGame();
+  const { selectCard, startGame, resetGame, isMovePending } = useGame();
   const { bestScore, submitScore } = useBestScore();
   const [gameError, setGameError] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<DifficultyId>(DEFAULT_DIFFICULTY);
+  const [repository, setRepository] = useState<Repository>(getInitialRepository);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const previousBestScore = useRef(bestScore);
 
@@ -51,8 +46,8 @@ export function GameBoard(): ReactElement {
   }, [contributors, difficulty, startGame]);
 
   useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+    void fetchData(repository);
+  }, [fetchData, repository]);
 
   useEffect(() => {
     if (contributors.length === 0) return;
@@ -76,7 +71,17 @@ export function GameBoard(): ReactElement {
   }, [bestScore, isGameOver, score, submitScore]);
 
   const handleRetry = (): void => {
-    void fetchData();
+    void fetchData(repository);
+  };
+
+  const handleNewRepository = useCallback((): void => {
+    resetGame();
+    setGameError(null);
+    setRepository((currentRepository) => pickRandomRepository(currentRepository));
+  }, [resetGame]);
+
+  const handleTryAnotherRepository = (): void => {
+    handleNewRepository();
   };
 
   const handleDifficultyChange = (nextDifficulty: DifficultyId): void => {
@@ -88,17 +93,6 @@ export function GameBoard(): ReactElement {
   const pairCount = getDifficulty(difficulty).config.pairsOfCards;
 
   const renderContent = (): ReactElement => {
-    if (isLoading && cards.length === 0) {
-      return (
-        <div role="status" className="py-2">
-          <p className="mb-4 text-center text-sm font-bold text-violet-600">
-            Cargando contribuyentes...
-          </p>
-          <BoardSkeleton count={pairCount * 2} />
-        </div>
-      );
-    }
-
     if (error !== null || gameError !== null) {
       return (
         <motion.div
@@ -114,7 +108,27 @@ export function GameBoard(): ReactElement {
             onClick={handleRetry}>
             Reintentar
           </button>
+          <button
+            type="button"
+            className="mt-4 ml-3 rounded-xl border border-rose-300 bg-white/75 px-5 py-2.5 font-black text-rose-800 transition hover:bg-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-700"
+            onClick={handleTryAnotherRepository}>
+            Otro repositorio
+          </button>
         </motion.div>
+      );
+    }
+
+    if ((isLoading || status === 'idle') && cards.length === 0) {
+      return (
+        <div role="status" className="py-2">
+          <p className="mb-1 text-center text-sm font-bold text-violet-600">
+            Cargando contribuyentes...
+          </p>
+          <p className="mb-4 text-center text-xs font-semibold text-violet-500/80">
+            Repositorio: {formatRepository(repository)}
+          </p>
+          <BoardSkeleton count={pairCount * 2} />
+        </div>
       );
     }
 
@@ -148,12 +162,16 @@ export function GameBoard(): ReactElement {
   return (
     <div className="relative flex min-h-screen flex-col">
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pb-4">
-        <GameBoardHeader />
+        <GameBoardHeader
+          repositoryName={formatRepository(repository)}
+          isShuffleDisabled={isLoading || status === 'idle'}
+          onShuffle={handleNewRepository}
+        />
 
         <div className="mb-4 flex flex-col items-center gap-1.5">
           <DifficultySelector
             value={difficulty}
-            disabled={isLoading || contributors.length === 0}
+            disabled={isLoading || status === 'idle' || contributors.length === 0}
             onChange={handleDifficultyChange}
           />
           <p className="text-[0.65rem] font-semibold text-violet-500/80">
@@ -171,7 +189,7 @@ export function GameBoard(): ReactElement {
       </main>
 
       <GameOverModal
-        onOk={startNewGame}
+        onOk={handleNewRepository}
         bestScore={bestScore}
         isNewRecord={isNewRecord}
       />

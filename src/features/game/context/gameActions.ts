@@ -2,6 +2,7 @@ import type { GameCard, GameConfig } from '../types';
 
 export const GAME_ACTION_TYPES = {
   START_GAME: 'START_GAME',
+  RESET_GAME: 'RESET_GAME',
   SELECT_CARD: 'SELECT_CARD',
   FACE_DOWN_CARDS: 'FACE_DOWN_CARDS',
   TICK: 'TICK',
@@ -15,6 +16,7 @@ export type GameAction =
         readonly config: GameConfig;
       };
     }
+  | { readonly type: typeof GAME_ACTION_TYPES.RESET_GAME }
   | {
       readonly type: typeof GAME_ACTION_TYPES.SELECT_CARD;
       readonly payload: { readonly cardId: number };

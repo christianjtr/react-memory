@@ -32,6 +32,10 @@ export function useGame() {
     [dispatch],
   );
 
+  const resetGame = useCallback((): void => {
+    dispatch({ type: GAME_ACTION_TYPES.RESET_GAME });
+  }, [dispatch]);
+
   const startGame = useCallback(
     (contributors: readonly Contributor[], overrides?: Partial<GameConfig>): void => {
       const config = resolveGameConfig(overrides);
@@ -48,6 +52,7 @@ export function useGame() {
   return {
     selectCard,
     startGame,
+    resetGame,
     selectedCardIds: state.selectedCardIds,
     isMovePending: state.pendingResolution !== 'none',
   };

@@ -27,6 +27,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case GAME_ACTION_TYPES.RESET_GAME: {
+      return {
+        ...state,
+        cards: [],
+        foundContributorIds: [],
+        selectedCardIds: [],
+        score: 0,
+        timer: state.config.durationInSeconds,
+        status: 'idle',
+        pendingResolution: 'none',
+        isGameOver: false,
+      };
+    }
+
     case GAME_ACTION_TYPES.SELECT_CARD: {
       if (
         state.status !== 'playing' ||
