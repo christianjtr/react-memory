@@ -110,4 +110,4 @@ validation and mapping are isolated from UI components.
 
 ## Demo
 
-![](demo.gif)
+![](./samples/demo_v2.gif)
