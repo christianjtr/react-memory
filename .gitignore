@@ -10,7 +10,14 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
+.vite
 *.local
+
+# Environment
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -22,5 +29,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-./jest.config.ts
-coverage
