@@ -21,7 +21,7 @@ export function GameBoardFooter({
 
   return (
     <footer className="my-6 grid w-full gap-3 sm:grid-cols-[auto_1fr]">
-      <div className="flex items-center gap-3 rounded-3xl border border-white/70 bg-white/55 p-3 shadow-card backdrop-blur-md sm:pr-5">
+      <div className="flex items-center gap-3 rounded-3xl border border-violet-200/70 bg-violet-50/85 p-3 shadow-card backdrop-blur-md sm:pr-5">
         <TimerRing
           timer={timer}
           total={config.durationInSeconds}
@@ -37,7 +37,7 @@ export function GameBoardFooter({
         </div>
       </div>
 
-      <div className="flex flex-col justify-center rounded-3xl border border-white/70 bg-white/55 p-4 shadow-card backdrop-blur-md">
+      <div className="flex flex-col justify-center rounded-3xl border border-violet-200/70 bg-violet-50/85 p-4 shadow-card backdrop-blur-md">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.6rem] font-bold tracking-[0.22em] text-violet-500 uppercase">
@@ -54,13 +54,13 @@ export function GameBoardFooter({
             </motion.p>
           </div>
 
-          <span className="rounded-xl bg-[linear-gradient(120deg,#ede9fe,#cffafe)] px-3 py-1.5 text-xs font-black text-violet-700 ring-1 ring-violet-200/80">
+          <span className="rounded-xl bg-[linear-gradient(120deg,#ddd6fe,#a5f3fc)] px-3 py-1.5 text-xs font-black text-violet-900 ring-1 ring-violet-300/90">
             Récord: {bestScore > 0 ? bestScore : '—'}
           </span>
         </div>
 
         <div
-          className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-violet-100"
+          className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-violet-200"
           role="progressbar"
           aria-label="Parejas encontradas"
           aria-valuemin={0}

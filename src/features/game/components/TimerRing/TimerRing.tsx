@@ -42,7 +42,7 @@ export function TimerRing({ timer, total, isRunning }: TimerRingProps): ReactEle
           r={RADIUS}
           fill="none"
           strokeWidth={STROKE}
-          className="stroke-violet-100"
+          className="stroke-violet-200"
         />
         <motion.circle
           cx={SIZE / 2}

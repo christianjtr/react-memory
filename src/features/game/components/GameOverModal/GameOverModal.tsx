@@ -56,13 +56,13 @@ export function GameOverModal({
   return (
     <dialog
       ref={dialogRef}
-      className="m-auto w-[calc(100%-2rem)] max-w-lg border-0 bg-transparent p-0 text-ink backdrop:bg-violet-950/35 backdrop:backdrop-blur-sm"
+      className="m-auto w-[calc(100%-2rem)] max-w-lg border-0 bg-transparent p-0 text-ink backdrop:bg-violet-950/45 backdrop:backdrop-blur-sm"
       aria-labelledby="game-over-title"
       onCancel={handleCancel}>
       <ConfettiBurst active={isGameOver} />
 
       <motion.div
-        className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 shadow-2xl backdrop-blur-xl"
+        className="relative overflow-hidden rounded-[2rem] border border-violet-200/70 bg-violet-50/95 shadow-2xl backdrop-blur-xl"
         initial={{ opacity: 0, scale: 0.86, y: 28 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 240, damping: 22 }}>
@@ -77,7 +77,7 @@ export function GameOverModal({
 
         <div className="relative px-6 py-8 text-center">
           <motion.div
-            className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#7c3aed,#d946ef_55%,#0891b2)] shadow-glow-violet ring-1 ring-white/60"
+            className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#5b21b6,#a21caf_55%,#0e7490)] shadow-glow-violet ring-1 ring-white/60"
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 320, damping: 16 }}>
@@ -133,7 +133,7 @@ export function GameOverModal({
 
           <button
             type="button"
-            className="rounded-2xl bg-[linear-gradient(120deg,#7c3aed,#d946ef_55%,#0891b2)] px-6 py-3 text-base font-black text-white shadow-glow-violet transition hover:brightness-110 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600"
+            className="rounded-2xl bg-[linear-gradient(120deg,#5b21b6,#a21caf_55%,#0e7490)] px-6 py-3 text-base font-black text-white shadow-glow-violet transition hover:brightness-110 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600"
             autoFocus
             onClick={onOk}>
             New game!

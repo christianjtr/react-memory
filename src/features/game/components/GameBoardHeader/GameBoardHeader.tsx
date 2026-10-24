@@ -25,7 +25,7 @@ export function GameBoardHeader({
           aria-hidden="true"
           className="absolute inset-0 rounded-3xl bg-fuchsia-400/60 blur-xl"
         />
-        <span className="relative flex h-14 w-14 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#7c3aed,#d946ef_52%,#0891b2)] shadow-glow-violet ring-1 ring-white/60">
+        <span className="relative flex h-14 w-14 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#5b21b6,#a21caf_52%,#0e7490)] shadow-glow-violet ring-1 ring-white/60">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -49,7 +49,7 @@ export function GameBoardHeader({
       </motion.h1>
 
       <motion.p
-        className="max-w-md text-sm font-semibold text-violet-800/75 sm:text-base"
+        className="max-w-md text-sm font-semibold text-violet-900/85 sm:text-base"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.16, duration: 0.4 }}>
@@ -58,7 +58,7 @@ export function GameBoardHeader({
 
       {repositoryName !== undefined ? (
         <motion.div
-          className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/80 bg-white/65 py-1.5 pr-1.5 pl-3 text-xs font-bold text-violet-800 shadow-card backdrop-blur-md sm:text-sm"
+          className="inline-flex max-w-full items-center gap-2 rounded-full border border-violet-200/80 bg-violet-50/90 py-1.5 pr-1.5 pl-3 text-xs font-bold text-violet-900 shadow-card backdrop-blur-md sm:text-sm"
           initial={{ opacity: 0, y: 8, scale: 0.94 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.22, type: 'spring', stiffness: 260, damping: 22 }}>
@@ -75,7 +75,7 @@ export function GameBoardHeader({
           {onShuffle !== undefined ? (
             <button
               type="button"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 transition hover:bg-violet-200 hover:text-violet-950 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-200 text-violet-900 transition hover:bg-violet-300 hover:text-violet-950 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Elegir otro repositorio aleatorio"
               title="Elegir otro repositorio aleatorio"
               disabled={isShuffleDisabled}

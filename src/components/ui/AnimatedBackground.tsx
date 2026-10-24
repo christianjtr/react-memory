@@ -107,10 +107,10 @@ export function AnimatedBackground(): ReactElement {
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,#fef3ff_0%,#fff8f1_45%,#eefcff_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,#f2e8fb_0%,#f7f0f8_45%,#e3f5f7_100%)]" />
 
       <div
-        className="absolute inset-0 opacity-40 [mask-image:radial-gradient(ellipse_at_center,black,transparent_78%)]"
+        className="absolute inset-0 opacity-45 [mask-image:radial-gradient(ellipse_at_center,black,transparent_78%)]"
         style={{
           backgroundImage:
             'linear-gradient(to right, rgb(139 92 246 / 0.16) 1px, transparent 1px), linear-gradient(to bottom, rgb(139 92 246 / 0.16) 1px, transparent 1px)',

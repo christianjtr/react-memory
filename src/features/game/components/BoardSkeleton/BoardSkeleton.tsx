@@ -10,7 +10,7 @@ export function BoardSkeleton({ count = 12 }: BoardSkeletonProps): ReactElement 
       {Array.from({ length: count }, (_, index) => (
         <div
           key={index}
-          className="relative aspect-square overflow-hidden rounded-2xl border border-white/70 bg-white/60">
+          className="relative aspect-square overflow-hidden rounded-2xl border border-violet-200/80 bg-violet-100/85">
           <div
             className="absolute inset-0 animate-shimmer opacity-80"
             style={{

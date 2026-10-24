@@ -50,7 +50,7 @@ export const Card = memo(function Card({
         className={`group relative block aspect-square w-full rounded-2xl border text-left [perspective:1000px] transition-shadow duration-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600 disabled:cursor-default ${
           isMatched
             ? 'border-emerald-300/80 shadow-[0_0_0_4px_rgb(52_211_153_/_0.18),0_18px_38px_-16px_rgb(16_185_129_/_0.7)]'
-            : 'border-white/70 shadow-card'
+            : 'border-violet-200/80 shadow-card'
         }`}
         aria-label={label}
         aria-pressed={isFlipped}
@@ -68,12 +68,12 @@ export const Card = memo(function Card({
           animate={{ rotateY: isFlipped ? 180 : 0 }}
           transition={{ type: 'spring', stiffness: 210, damping: 22 }}>
           <span className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-2xl [backface-visibility:hidden]">
-            <span className="absolute inset-0 bg-[linear-gradient(135deg,#7c3aed_0%,#c026d3_48%,#0891b2_100%)]" />
-            <span className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle_at_20%_20%,white_1.5px,transparent_1.7px)] [background-size:18px_18px]" />
-            <span className="absolute inset-0 bg-[radial-gradient(circle_at_30%_15%,rgb(255_255_255_/_0.45),transparent_55%)]" />
+            <span className="absolute inset-0 bg-[linear-gradient(135deg,#5b21b6_0%,#a21caf_48%,#0e7490_100%)]" />
+            <span className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,white_1.5px,transparent_1.7px)] [background-size:18px_18px]" />
+            <span className="absolute inset-0 bg-[radial-gradient(circle_at_30%_15%,rgb(255_255_255_/_0.22),transparent_55%)]" />
             <span className="absolute top-2 left-2 h-1.5 w-1.5 rounded-full bg-white/70" />
             <span className="absolute right-3 bottom-3 h-2 w-2 rotate-45 rounded-sm bg-amber-300/90" />
-            <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/40 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14">
+            <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/35 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14">
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"

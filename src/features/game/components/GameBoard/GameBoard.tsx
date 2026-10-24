@@ -97,7 +97,7 @@ export function GameBoard(): ReactElement {
       return (
         <motion.div
           role="alert"
-          className="rounded-3xl border border-rose-200 bg-rose-50/90 p-6 text-center shadow-card"
+          className="rounded-3xl border border-rose-300 bg-rose-100/95 p-6 text-center shadow-card"
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
@@ -181,7 +181,7 @@ export function GameBoard(): ReactElement {
 
         <section
           aria-label="Zona de juego"
-          className="rounded-[2rem] border border-white/70 bg-white/50 p-3 shadow-[0_34px_80px_-46px_rgb(76_29_149_/_0.85)] backdrop-blur-xl sm:p-5">
+          className="rounded-[2rem] border border-white/80 bg-violet-50/80 p-3 shadow-[0_34px_80px_-46px_rgb(76_29_149_/_0.85)] backdrop-blur-xl sm:p-5">
           {renderContent()}
         </section>
 

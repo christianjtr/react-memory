@@ -21,11 +21,11 @@ export function DifficultySelector({
     <div
       role="group"
       aria-label="Dificultad"
-      className="w-full max-w-sm rounded-2xl border border-white/70 bg-white/55 p-1 shadow-card backdrop-blur-md">
+      className="w-full max-w-sm rounded-2xl border border-violet-200/80 bg-violet-50/90 p-1 shadow-card backdrop-blur-md">
       <div className="relative grid grid-cols-3 gap-1">
         <span
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-[calc((100%-0.5rem)/3)] rounded-xl bg-[linear-gradient(120deg,#7c3aed,#c026d3_55%,#0891b2)] shadow-[0_10px_24px_-10px_rgb(124_58_237_/_0.8)] transition-transform duration-300 ease-out"
+          className="absolute inset-y-0 left-0 w-[calc((100%-0.5rem)/3)] rounded-xl bg-[linear-gradient(120deg,#5b21b6,#a21caf_55%,#0e7490)] shadow-[0_10px_24px_-10px_rgb(91_33_182_/_0.9)] transition-transform duration-300 ease-out"
           style={{
             transform: `translateX(calc(${activeIndex * 100}% + ${activeIndex * 0.25}rem))`,
           }}
