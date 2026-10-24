@@ -1,6 +1,6 @@
 # Github Memory
 
-A memory game built with the GitHub contributors of a repository.
+A colorful, animated memory game that matches contributors from popular GitHub repositories.
 
 ## Live demo
 
@@ -11,6 +11,7 @@ https://christianjtr.github.io/react-memory
 - React 19 + TypeScript 5.9
 - Vite 8
 - Tailwind CSS 4
+- Motion 14 for interactive animations
 - Vitest 5 + React Testing Library
 - ESLint 10 (flat config) + Prettier 3
 
@@ -27,16 +28,31 @@ npm ci
 npm run dev
 ```
 
-The app loads `facebook/react` contributors by default. To use another repository,
-copy `.env.example` to `.env` and set:
+Each round starts with a randomly selected repository from a curated pool of popular
+open-source projects. The active repository is shown above the board; use the shuffle
+button or finish a round to choose another one. The previous repository is excluded
+from the next selection. Contributor lists are cached in memory for the current page
+session to reduce GitHub API requests.
+
+To choose the initial repository, copy `.env.example` to `.env` and set both values:
 
 ```shell
 VITE_REPO_OWNER=owner
 VITE_REPO_NAME=repository
 ```
 
+This only sets the initial repository; later rounds return to the random pool.
+
 The GitHub API is public and rate-limited. No token or secret is required or stored
-in the client.
+in the client. The app uses the first page of contributors returned by GitHub, which
+provides more than enough candidates for the included difficulty levels.
+
+## Gameplay and effects
+
+- Choose **Easy** (4 pairs / 90 seconds), **Normal** (6 / 60), or **Hard** (8 / 45).
+- Flip animated 3D cards, track your score and timer, and celebrate a win with confetti.
+- Your best score is saved in browser `localStorage`.
+- Animations respect the operating system's reduced-motion preference.
 
 ## Scripts
 
@@ -62,8 +78,8 @@ in the client.
 src/
   app/                       application bootstrap
   features/
-    contributors/            GitHub API, adapter, hook and types
-    game/                    components, context, reducer, hooks and deck logic
+    contributors/            GitHub API, repository pool, adapter, hook and types
+    game/                    animated UI, context, reducer, hooks, difficulty and deck logic
   lib/                       shared utilities
   styles/                    Tailwind entry point
   test/                      test setup and fixtures
@@ -77,6 +93,8 @@ validation and mapping are isolated from UI components.
 - `npm audit` is expected to report zero vulnerabilities.
 - Dependencies are grouped in weekly Dependabot pull requests.
 - Repository segments are validated before building the GitHub API URL.
+- Random repository choices come from a curated list of popular public projects.
+- Contributor results are cached in memory for the current page session.
 - API responses are validated and avatars are restricted to
   `https://avatars.githubusercontent.com`.
 - CI runs audit, lint, typecheck, tests with coverage and a production build on every
