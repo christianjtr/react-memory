@@ -1,6 +1,13 @@
 # Github Memory
 
-A colorful, animated memory game that matches contributors from popular GitHub repositories.
+A colorful, animated memory game that matches contributors from popular GitHub repositories. The current app is the second major evolution of the project, with refreshed visuals, new gameplay features, and a modernized frontend stack.
+
+## Project versions
+
+- **Version 2 (current):** the actively developed experience documented below.
+- **Version 1:** preserved at the [`v1.0.0` tag](https://github.com/christianjtr/react-memory/tree/v1.0.0), a snapshot of the original game before the redesign and modernization.
+
+The `v1.0.0` tag is an immutable historical reference; the default branch contains the evolved version 2 codebase.
 
 ## Live demo
 
