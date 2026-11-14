@@ -1,24 +1,12 @@
 import { useCallback, useState } from 'react';
+import { readNumber, writeNumber } from '@/lib/storage';
 
 export const BEST_SCORE_STORAGE_KEY = 'github-memory:best-score';
 
 function readBestScore(): number {
-  try {
-    const storedValue = window.localStorage.getItem(BEST_SCORE_STORAGE_KEY);
-    const parsedValue = Number(storedValue);
+  const parsedValue = readNumber(BEST_SCORE_STORAGE_KEY);
 
-    return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 0;
-  } catch {
-    return 0;
-  }
-}
-
-function persistBestScore(score: number): void {
-  try {
-    window.localStorage.setItem(BEST_SCORE_STORAGE_KEY, String(score));
-  } catch {
-    return;
-  }
+  return parsedValue !== null && parsedValue > 0 ? parsedValue : 0;
 }
 
 export function useBestScore() {
@@ -30,7 +18,7 @@ export function useBestScore() {
     setBestScore((currentBestScore) => {
       if (score <= currentBestScore) return currentBestScore;
 
-      persistBestScore(score);
+      writeNumber(BEST_SCORE_STORAGE_KEY, score);
       return score;
     });
   }, []);

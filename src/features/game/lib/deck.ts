@@ -1,10 +1,12 @@
 import type { Contributor } from '@/features/contributors/types';
+import type { RandomSource } from '@/lib/random';
 import { shuffle } from '@/lib/shuffle';
 import type { GameCard } from '../types';
 
 export function buildDeck(
   contributors: readonly Contributor[],
   numberOfPairs: number,
+  random?: RandomSource,
 ): GameCard[] {
   if (!Number.isInteger(numberOfPairs) || numberOfPairs < 1) {
     throw new RangeError('La cantidad de pares debe ser un entero positivo.');
@@ -22,13 +24,16 @@ export function buildDeck(
     );
   }
 
-  const selectedContributors = shuffle(uniqueContributors).slice(0, numberOfPairs);
+  const selectedContributors = shuffle(uniqueContributors, random).slice(
+    0,
+    numberOfPairs,
+  );
   const pairedContributors = selectedContributors.flatMap((contributor) => [
     contributor,
     contributor,
   ]);
 
-  return shuffle(pairedContributors).map((contributor, cardId) => ({
+  return shuffle(pairedContributors, random).map((contributor, cardId) => ({
     cardId,
     contributor,
     isFaceDown: true,
