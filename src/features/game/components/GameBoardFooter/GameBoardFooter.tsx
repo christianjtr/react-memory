@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import type { ReactElement } from 'react';
 import { useGameState } from '../../hooks/useGameContext';
+import { computeAccuracy } from '../../lib/scoring';
 import { TimerRing } from '../TimerRing/TimerRing';
 
 export interface GameBoardFooterProps {
@@ -10,14 +11,15 @@ export interface GameBoardFooterProps {
 export function GameBoardFooter({
   bestScore = 0,
 }: GameBoardFooterProps): ReactElement | null {
-  const { score, timer, status, config, foundContributorIds } = useGameState();
+  const { score, timer, status, config, foundContributorIds, streak, errors } =
+    useGameState();
 
   if (status === 'idle') return null;
 
-  const progress = Math.min(
-    1,
-    foundContributorIds.length / Math.max(1, config.pairsOfCards),
-  );
+  const pairsFound = foundContributorIds.length;
+  const progress = Math.min(1, pairsFound / Math.max(1, config.pairsOfCards));
+  const accuracy = computeAccuracy(pairsFound, errors);
+  const hasStreak = streak >= 2;
 
   return (
     <footer className="my-6 grid w-full gap-3 sm:grid-cols-[auto_1fr]">
@@ -54,9 +56,21 @@ export function GameBoardFooter({
             </motion.p>
           </div>
 
-          <span className="rounded-xl bg-[linear-gradient(120deg,#ddd6fe,#a5f3fc)] px-3 py-1.5 text-xs font-black text-violet-900 ring-1 ring-violet-300/90">
-            Récord: {bestScore > 0 ? bestScore : '—'}
-          </span>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {hasStreak ? (
+              <motion.span
+                key={streak}
+                className="rounded-xl bg-[linear-gradient(120deg,#fde68a,#fbbf24)] px-3 py-1.5 text-xs font-black text-amber-900 ring-1 ring-amber-300/90"
+                initial={{ scale: 0.7, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 18 }}>
+                Racha ×{streak}
+              </motion.span>
+            ) : null}
+            <span className="rounded-xl bg-[linear-gradient(120deg,#ddd6fe,#a5f3fc)] px-3 py-1.5 text-xs font-black text-violet-900 ring-1 ring-violet-300/90">
+              Récord: {bestScore > 0 ? bestScore : '—'}
+            </span>
+          </div>
         </div>
 
         <div
@@ -65,7 +79,7 @@ export function GameBoardFooter({
           aria-label="Parejas encontradas"
           aria-valuemin={0}
           aria-valuemax={config.pairsOfCards}
-          aria-valuenow={foundContributorIds.length}>
+          aria-valuenow={pairsFound}>
           <motion.div
             className="h-full rounded-full bg-[linear-gradient(90deg,#7c3aed,#d946ef_55%,#06b6d4)]"
             initial={false}
@@ -74,9 +88,14 @@ export function GameBoardFooter({
           />
         </div>
 
-        <p className="mt-2 text-[0.7rem] font-bold text-violet-600/80">
-          {foundContributorIds.length} de {config.pairsOfCards} parejas encontradas
-        </p>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3">
+          <p className="text-[0.7rem] font-bold text-violet-600/80">
+            {pairsFound} de {config.pairsOfCards} parejas encontradas
+          </p>
+          <p className="text-[0.7rem] font-bold text-violet-600/80">
+            Precisión: {accuracy}%
+          </p>
+        </div>
       </div>
     </footer>
   );

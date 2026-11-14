@@ -6,37 +6,46 @@ import {
   getInitialRepository,
   pickRandomRepository,
 } from '@/features/contributors/lib/repositories';
+import { PlayerSettingsModal } from '@/features/player/components/PlayerSettingsModal';
+import { usePlayerProfile } from '@/features/player/hooks/usePlayerProfile';
+import { RecordsModal } from '@/features/records/components/RecordsModal';
+import { useRecords } from '@/features/records/hooks/useRecords';
 import { BoardSkeleton } from '../BoardSkeleton/BoardSkeleton';
 import { Card } from '../Card/Card';
 import { DifficultySelector } from '../DifficultySelector/DifficultySelector';
 import { GameBoardFooter } from '../GameBoardFooter/GameBoardFooter';
 import { GameBoardHeader } from '../GameBoardHeader/GameBoardHeader';
-import { GameOverModal } from '../GameOverModal/GameOverModal';
+import { GameResultsModal } from '../GameResultsModal/GameResultsModal';
 import { useGame } from '../../hooks/useGame';
-import { useBestScore } from '../../hooks/useBestScore';
 import { useGameState } from '../../hooks/useGameContext';
 import { getDifficulty, type DifficultyId } from '../../lib/difficulty';
+import { buildRoundResult } from '../../lib/roundResult';
 
 export function GameBoard(): ReactElement {
+  const gameState = useGameState();
   const {
     cards,
     status,
-    score,
-    finalScore,
     isGameOver,
     pendingResolution,
     selectedCardIds,
     difficulty,
     repository,
-  } = useGameState();
+  } = gameState;
   const { contributors, isLoading, error, fetchData } = useGithubContributors();
   const { selectCard, startGame, resetGame, setDifficulty, setRepository, isMovePending } =
     useGame();
-  const { bestScore, submitScore } = useBestScore();
+  const { profile, saveNickname } = usePlayerProfile();
+  const { records, saveRound } = useRecords();
   const [gameError, setGameError] = useState<string | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
-  const previousBestScore = useRef(bestScore);
+  const [isPlayerSettingsOpen, setIsPlayerSettingsOpen] = useState(false);
+  const [isRecordsOpen, setIsRecordsOpen] = useState(false);
+  const previousBestScore = useRef(records.globalBestScore);
+  const recordedRoundRef = useRef<number | null>(null);
   const hasInitializedRepository = useRef(false);
+
+  const bestScore = records.globalBestScore;
 
   useEffect(() => {
     if (hasInitializedRepository.current) return;
@@ -70,19 +79,34 @@ export function GameBoard(): ReactElement {
 
   useEffect(() => {
     if (!isGameOver) {
+      recordedRoundRef.current = null;
       previousBestScore.current = bestScore;
       setIsNewRecord(false);
       return;
     }
 
-    const submittedScore = finalScore ?? score;
-    const isRecord = submittedScore > previousBestScore.current;
-    setIsNewRecord(isRecord);
+    const result = buildRoundResult(gameState);
+    if (result === null) return;
 
-    if (isRecord) {
-      submitScore(submittedScore);
+    const startedAt = gameState.round?.startedAt ?? null;
+    if (recordedRoundRef.current === startedAt) return;
+    recordedRoundRef.current = startedAt;
+
+    setIsNewRecord(result.score > previousBestScore.current);
+
+    if (result.mode === 'classic') {
+      saveRound({
+        difficulty: result.difficulty,
+        score: result.score,
+        accuracy: result.accuracy,
+        elapsedSeconds: result.elapsedSeconds,
+        pairsFound: result.pairsFound,
+        errors: result.errors,
+        bestStreak: result.bestStreak,
+        won: result.outcome === 'won',
+      });
     }
-  }, [bestScore, finalScore, isGameOver, score, submitScore]);
+  }, [bestScore, gameState, isGameOver, saveRound]);
 
   const handleRetry = (): void => {
     if (repository === null) return;
@@ -184,8 +208,11 @@ export function GameBoard(): ReactElement {
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pb-4">
         <GameBoardHeader
           repositoryName={repositoryLabel}
+          nickname={profile.nickname}
           isShuffleDisabled={isLoading || status === 'idle'}
           onShuffle={handleNewRepository}
+          onOpenSettings={() => setIsPlayerSettingsOpen(true)}
+          onOpenRecords={() => setIsRecordsOpen(true)}
         />
 
         <div className="mb-4 flex flex-col items-center gap-1.5">
@@ -208,10 +235,25 @@ export function GameBoard(): ReactElement {
         <GameBoardFooter bestScore={bestScore} />
       </main>
 
-      <GameOverModal
+      <GameResultsModal
         onOk={handleNewRepository}
+        onOpenRecords={() => setIsRecordsOpen(true)}
         bestScore={bestScore}
         isNewRecord={isNewRecord}
+        nickname={profile.nickname}
+      />
+
+      <PlayerSettingsModal
+        open={isPlayerSettingsOpen}
+        nickname={profile.nickname}
+        onClose={() => setIsPlayerSettingsOpen(false)}
+        onSave={saveNickname}
+      />
+
+      <RecordsModal
+        open={isRecordsOpen}
+        records={records}
+        onClose={() => setIsRecordsOpen(false)}
       />
     </div>
   );

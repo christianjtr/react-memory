@@ -4,5 +4,5 @@ export { DifficultySelector, type DifficultySelectorProps } from './DifficultySe
 export { GameBoard } from './GameBoard';
 export { GameBoardFooter, type GameBoardFooterProps } from './GameBoardFooter';
 export { GameBoardHeader, type GameBoardHeaderProps } from './GameBoardHeader';
-export { GameOverModal, type GameOverModalProps } from './GameOverModal';
+export { GameResultsModal, type GameResultsModalProps } from './GameResultsModal';
 export { TimerRing, type TimerRingProps } from './TimerRing';
