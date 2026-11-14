@@ -1,5 +1,10 @@
 import { assertNever } from '@/lib/assertNever';
 import { GAME_ACTION_TYPES, type GameAction } from './gameActions';
+import {
+  buildScoreBreakdown,
+  computeLiveScore,
+  computeStreakBonusForLevel,
+} from '../lib/scoring';
 import type { GameCard, GameState } from '../types';
 
 function flipCards(cards: readonly GameCard[], cardIds: readonly number[]): GameCard[] {
@@ -10,8 +15,32 @@ function flipCards(cards: readonly GameCard[], cardIds: readonly number[]): Game
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
+    case GAME_ACTION_TYPES.SET_DIFFICULTY: {
+      if (state.difficulty === action.payload.difficulty) return state;
+
+      return { ...state, difficulty: action.payload.difficulty };
+    }
+
+    case GAME_ACTION_TYPES.SET_REPOSITORY: {
+      if (
+        state.repository !== null &&
+        state.repository.owner === action.payload.repository.owner &&
+        state.repository.name === action.payload.repository.name
+      ) {
+        return state;
+      }
+
+      return { ...state, repository: action.payload.repository };
+    }
+
+    case GAME_ACTION_TYPES.SET_MODE: {
+      if (state.mode === action.payload.mode) return state;
+
+      return { ...state, mode: action.payload.mode };
+    }
+
     case GAME_ACTION_TYPES.START_GAME: {
-      const { cards, config } = action.payload;
+      const { cards, config, mode, repository, startedAt } = action.payload;
 
       return {
         ...state,
@@ -19,11 +48,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         foundContributorIds: [],
         selectedCardIds: [],
         score: 0,
+        streakPoints: 0,
+        moves: 0,
+        errors: 0,
+        streak: 0,
+        bestStreak: 0,
+        outcome: null,
+        finalScore: null,
         timer: config.durationInSeconds,
         config,
         status: 'playing',
         pendingResolution: 'none',
         isGameOver: false,
+        round: {
+          mode,
+          difficulty: state.difficulty,
+          repository,
+          startedAt,
+        },
       };
     }
 
@@ -34,6 +76,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         foundContributorIds: [],
         selectedCardIds: [],
         score: 0,
+        streakPoints: 0,
+        moves: 0,
+        errors: 0,
+        streak: 0,
+        bestStreak: 0,
+        outcome: null,
+        finalScore: null,
         timer: state.config.durationInSeconds,
         status: 'idle',
         pendingResolution: 'none',
@@ -80,12 +129,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
 
+      const moves = state.moves + 1;
+
       if (firstCard.contributor.id !== secondCard.contributor.id) {
+        const errors = state.errors + 1;
+
         return {
           ...state,
           cards: cardsWithSelection,
           selectedCardIds,
+          moves,
+          errors,
+          streak: 0,
           pendingResolution: 'mismatch',
+          score: computeLiveScore({
+            pairsFound: state.foundContributorIds.length,
+            errors,
+            streakPoints: state.streakPoints,
+            scoreMultiplier: state.config.scoreMultiplier,
+          }),
         };
       }
 
@@ -93,7 +155,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const foundContributorIds = state.foundContributorIds.includes(contributorId)
         ? state.foundContributorIds
         : [...state.foundContributorIds, contributorId];
+      const streak = state.streak + 1;
+      const streakPoints = state.streakPoints + computeStreakBonusForLevel(streak);
+      const bestStreak = Math.max(state.bestStreak, streak);
       const isGameOver = foundContributorIds.length === state.config.pairsOfCards;
+      const score = computeLiveScore({
+        pairsFound: foundContributorIds.length,
+        errors: state.errors,
+        streakPoints,
+        scoreMultiplier: state.config.scoreMultiplier,
+      });
 
       return {
         ...state,
@@ -104,10 +175,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ),
         foundContributorIds,
         selectedCardIds: [],
-        score: state.config.scoreMultiplier * foundContributorIds.length,
+        moves,
+        streak,
+        bestStreak,
+        streakPoints,
+        score,
         status: isGameOver ? 'finished' : 'playing',
         pendingResolution: 'none',
         isGameOver,
+        outcome: isGameOver ? 'won' : null,
+        finalScore: isGameOver
+          ? buildScoreBreakdown({
+              pairsFound: foundContributorIds.length,
+              errors: state.errors,
+              streakPoints,
+              scoreMultiplier: state.config.scoreMultiplier,
+              remainingSeconds: state.timer,
+            }).total
+          : null,
       };
     }
 
@@ -126,13 +211,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (state.status !== 'playing') return state;
 
       const timer = Math.max(0, state.timer - 1);
-      const isGameOver = timer === 0;
+
+      if (timer > 0) {
+        return { ...state, timer };
+      }
 
       return {
         ...state,
-        timer,
-        status: isGameOver ? 'finished' : 'playing',
-        isGameOver,
+        timer: 0,
+        status: 'finished',
+        isGameOver: true,
+        outcome: 'lost',
+        finalScore: buildScoreBreakdown({
+          pairsFound: state.foundContributorIds.length,
+          errors: state.errors,
+          streakPoints: state.streakPoints,
+          scoreMultiplier: state.config.scoreMultiplier,
+          remainingSeconds: 0,
+        }).total,
       };
     }
 

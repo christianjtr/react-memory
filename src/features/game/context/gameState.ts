@@ -17,6 +17,17 @@ export const INITIAL_GAME_STATE: GameState = {
   status: 'idle',
   pendingResolution: 'none',
   isGameOver: false,
+  mode: 'classic',
+  difficulty: 'normal',
+  repository: null,
+  round: null,
+  moves: 0,
+  errors: 0,
+  streak: 0,
+  bestStreak: 0,
+  streakPoints: 0,
+  outcome: null,
+  finalScore: null,
 };
 
 function requirePositiveInteger(value: number, field: string): number {

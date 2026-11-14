@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { Repository } from '@/features/contributors/types';
 import { contributorsFixture } from '@/test/fixtures/contributors';
 import type { GameCard, GameConfig, GameState } from '../types';
 import { GAME_ACTION_TYPES, type GameAction } from './gameActions';
@@ -12,6 +13,8 @@ const config: GameConfig = resolveGameConfig({
   timeUntilFaceDownCardsInSeconds: 0.5,
 });
 
+const repository: Repository = { owner: 'facebook', name: 'react' };
+
 const contributorA = contributorsFixture[0]!;
 const contributorB = contributorsFixture[1]!;
 
@@ -22,11 +25,24 @@ const cards: GameCard[] = [
   { cardId: 3, contributor: contributorB, isFaceDown: true, isMatched: false },
 ];
 
-function startGame(): GameState {
+function startGameWithCards(
+  gameCards: readonly GameCard[],
+  gameConfig: GameConfig = config,
+): GameState {
   return gameReducer(INITIAL_GAME_STATE, {
     type: GAME_ACTION_TYPES.START_GAME,
-    payload: { cards, config },
+    payload: {
+      cards: gameCards,
+      config: gameConfig,
+      mode: 'classic',
+      repository,
+      startedAt: 1_700_000_000_000,
+    },
   });
+}
+
+function startGame(): GameState {
+  return startGameWithCards(cards);
 }
 
 function selectCard(state: GameState, cardId: number): GameState {
@@ -50,6 +66,19 @@ describe('gameReducer', () => {
       status: 'playing',
       pendingResolution: 'none',
       isGameOver: false,
+      moves: 0,
+      errors: 0,
+      streak: 0,
+      bestStreak: 0,
+      streakPoints: 0,
+      outcome: null,
+      finalScore: null,
+    });
+    expect(state.round).toEqual({
+      mode: 'classic',
+      difficulty: 'normal',
+      repository,
+      startedAt: 1_700_000_000_000,
     });
   });
 
@@ -64,6 +93,13 @@ describe('gameReducer', () => {
       foundContributorIds: [],
       selectedCardIds: [],
       score: 0,
+      streakPoints: 0,
+      moves: 0,
+      errors: 0,
+      streak: 0,
+      bestStreak: 0,
+      outcome: null,
+      finalScore: null,
       timer: config.durationInSeconds,
       status: 'idle',
       pendingResolution: 'none',
@@ -98,6 +134,8 @@ describe('gameReducer', () => {
     expect(state.cards[1]?.isFaceDown).toBe(false);
     expect(state.selectedCardIds).toEqual([0, 1]);
     expect(state.pendingResolution).toBe('mismatch');
+    expect(state.moves).toBe(1);
+    expect(state.errors).toBe(1);
   });
 
   it('ignores selections while a mismatch is pending', () => {
@@ -126,8 +164,64 @@ describe('gameReducer', () => {
     expect(state.foundContributorIds).toEqual([contributorA.id]);
     expect(state.selectedCardIds).toEqual([]);
     expect(state.score).toBe(50);
+    expect(state.streak).toBe(1);
+    expect(state.bestStreak).toBe(1);
+    expect(state.streakPoints).toBe(0);
     expect(state.status).toBe('playing');
     expect(state.isGameOver).toBe(false);
+  });
+
+  it('applies a streak bonus on consecutive matches', () => {
+    const firstMatch = selectCard(selectCard(startGame(), 0), 2);
+    const state = selectCard(selectCard(firstMatch, 1), 3);
+
+    expect(state.streak).toBe(2);
+    expect(state.bestStreak).toBe(2);
+    expect(state.streakPoints).toBe(25);
+    expect(state.score).toBe(125);
+  });
+
+  it('resets the streak on a mismatch but keeps the earned points', () => {
+    const contributorC = contributorsFixture[2]!;
+    const contributorD = contributorsFixture[3]!;
+    const openConfig = resolveGameConfig({
+      durationInSeconds: 10,
+      pairsOfCards: 3,
+      scoreMultiplier: 50,
+      timeUntilFaceDownCardsInSeconds: 0.5,
+    });
+    const extendedState = startGameWithCards(
+      [
+        ...cards,
+        {
+          cardId: 4,
+          contributor: contributorC,
+          isFaceDown: true,
+          isMatched: false,
+        },
+        {
+          cardId: 5,
+          contributor: contributorD,
+          isFaceDown: true,
+          isMatched: false,
+        },
+      ],
+      openConfig,
+    );
+
+    const firstMatch = selectCard(selectCard(extendedState, 0), 2);
+    const secondMatch = selectCard(selectCard(firstMatch, 1), 3);
+    const mismatchState = selectCard(selectCard(secondMatch, 4), 5);
+    const state = gameReducer(mismatchState, {
+      type: GAME_ACTION_TYPES.FACE_DOWN_CARDS,
+    });
+
+    expect(state.streak).toBe(0);
+    expect(state.bestStreak).toBe(2);
+    expect(state.streakPoints).toBe(25);
+    expect(state.errors).toBe(1);
+    expect(state.moves).toBe(3);
+    expect(state.score).toBe(100);
   });
 
   it('finishes the game when all pairs are found', () => {
@@ -135,9 +229,11 @@ describe('gameReducer', () => {
     const state = selectCard(selectCard(firstMatch, 1), 3);
 
     expect(state.foundContributorIds).toHaveLength(2);
-    expect(state.score).toBe(100);
+    expect(state.score).toBe(125);
     expect(state.status).toBe('finished');
     expect(state.isGameOver).toBe(true);
+    expect(state.outcome).toBe('won');
+    expect(state.finalScore).toBe(175);
   });
 
   it('ignores selections after the game is over', () => {
@@ -214,13 +310,67 @@ describe('gameReducer', () => {
       timer: 0,
       status: 'finished',
       isGameOver: true,
+      outcome: 'lost',
     });
+  });
+
+  it('awards no time bonus when the timer runs out', () => {
+    const matchedState = selectCard(selectCard(startGame(), 0), 2);
+    const finishedState = gameReducer(
+      { ...matchedState, timer: 1 },
+      { type: GAME_ACTION_TYPES.TICK },
+    );
+
+    expect(finishedState.outcome).toBe('lost');
+    expect(finishedState.finalScore).toBe(50);
   });
 
   it('ignores ticks when the game is not running', () => {
     expect(gameReducer(INITIAL_GAME_STATE, { type: GAME_ACTION_TYPES.TICK })).toBe(
       INITIAL_GAME_STATE,
     );
+  });
+
+  it('updates the difficulty, repository and mode', () => {
+    const withDifficulty = gameReducer(INITIAL_GAME_STATE, {
+      type: GAME_ACTION_TYPES.SET_DIFFICULTY,
+      payload: { difficulty: 'hard' },
+    });
+    const withRepository = gameReducer(withDifficulty, {
+      type: GAME_ACTION_TYPES.SET_REPOSITORY,
+      payload: { repository },
+    });
+    const withMode = gameReducer(withRepository, {
+      type: GAME_ACTION_TYPES.SET_MODE,
+      payload: { mode: 'daily' },
+    });
+
+    expect(withMode.difficulty).toBe('hard');
+    expect(withMode.repository).toEqual(repository);
+    expect(withMode.mode).toBe('daily');
+  });
+
+  it('ignores repeated difficulty, repository and mode updates', () => {
+    const withDifficulty = gameReducer(INITIAL_GAME_STATE, {
+      type: GAME_ACTION_TYPES.SET_DIFFICULTY,
+      payload: { difficulty: 'normal' },
+    });
+    const withRepository = gameReducer(withDifficulty, {
+      type: GAME_ACTION_TYPES.SET_REPOSITORY,
+      payload: { repository },
+    });
+    const withSameRepository = gameReducer(withRepository, {
+      type: GAME_ACTION_TYPES.SET_REPOSITORY,
+      payload: { repository },
+    });
+    const withMode = gameReducer(withRepository, {
+      type: GAME_ACTION_TYPES.SET_MODE,
+      payload: { mode: 'classic' },
+    });
+
+    expect(withDifficulty).toBe(INITIAL_GAME_STATE);
+    expect(withSameRepository).toBe(withRepository);
+    expect(withMode).toBe(withRepository);
   });
 
   it('rejects unknown actions', () => {

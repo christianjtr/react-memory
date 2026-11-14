@@ -1,10 +1,21 @@
 import { act, renderHook } from '@testing-library/react';
 import type { PropsWithChildren, ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+import type { Contributor, Repository } from '@/features/contributors/types';
 import { contributorsFixture } from '@/test/fixtures/contributors';
 import { GameProvider } from '../context/GameContext';
+import type { GameConfig } from '../types';
 import { useGame } from './useGame';
 import { useGameDispatch, useGameState } from './useGameContext';
+
+const repository: Repository = { owner: 'facebook', name: 'react' };
+
+const testConfig: Partial<GameConfig> = {
+  pairsOfCards: 2,
+  durationInSeconds: 2,
+  scoreMultiplier: 10,
+  timeUntilFaceDownCardsInSeconds: 0.01,
+};
 
 function wrapper({ children }: PropsWithChildren): ReactElement {
   return <GameProvider>{children}</GameProvider>;
@@ -13,6 +24,22 @@ function wrapper({ children }: PropsWithChildren): ReactElement {
 function renderGame() {
   return renderHook(() => ({ game: useGame(), state: useGameState() }), {
     wrapper,
+  });
+}
+
+type GameRenderResult = ReturnType<typeof renderGame>['result'];
+
+function startGame(
+  result: GameRenderResult,
+  contributors: readonly Contributor[],
+  config: Partial<GameConfig> = testConfig,
+): void {
+  act(() => {
+    result.current.game.setRepository(repository);
+  });
+
+  act(() => {
+    result.current.game.startGame(contributors, { config });
   });
 }
 
@@ -26,23 +53,37 @@ describe('useGame', () => {
     );
   });
 
+  it('requires a selected repository before starting', () => {
+    const { result } = renderGame();
+
+    expect(() => {
+      act(() => {
+        result.current.game.startGame(contributorsFixture.slice(0, 2), {
+          config: testConfig,
+        });
+      });
+    }).toThrow('No hay un repositorio seleccionado para iniciar la partida.');
+  });
+
   it('starts a game with a custom configuration', () => {
     const { result } = renderGame();
 
-    act(() => {
-      result.current.game.startGame(contributorsFixture.slice(0, 2), {
-        pairsOfCards: 2,
-        durationInSeconds: 2,
-        scoreMultiplier: 10,
-        timeUntilFaceDownCardsInSeconds: 0.01,
-      });
-    });
+    startGame(result, contributorsFixture.slice(0, 2));
 
     expect(result.current.state).toMatchObject({
       status: 'playing',
       timer: 2,
       score: 0,
       isGameOver: false,
+      outcome: null,
+      moves: 0,
+      errors: 0,
+      streak: 0,
+      bestStreak: 0,
+    });
+    expect(result.current.state.round).toMatchObject({
+      mode: 'classic',
+      repository,
     });
     expect(result.current.state.cards).toHaveLength(4);
     expect(result.current.game.selectedCardIds).toEqual([]);
@@ -52,14 +93,7 @@ describe('useGame', () => {
   it('resolves a matching pair', () => {
     const { result } = renderGame();
 
-    act(() => {
-      result.current.game.startGame(contributorsFixture.slice(0, 2), {
-        pairsOfCards: 2,
-        durationInSeconds: 2,
-        scoreMultiplier: 10,
-        timeUntilFaceDownCardsInSeconds: 0.01,
-      });
-    });
+    startGame(result, contributorsFixture.slice(0, 2));
 
     const contributorId = result.current.state.cards[0]?.contributor.id;
     const pair = result.current.state.cards.filter(
@@ -73,6 +107,9 @@ describe('useGame', () => {
 
     expect(result.current.state.foundContributorIds).toEqual([contributorId]);
     expect(result.current.state.score).toBe(10);
+    expect(result.current.state.moves).toBe(1);
+    expect(result.current.state.errors).toBe(0);
+    expect(result.current.state.streak).toBe(1);
     expect(result.current.state.selectedCardIds).toEqual([]);
   });
 
@@ -82,14 +119,7 @@ describe('useGame', () => {
     try {
       const { result } = renderGame();
 
-      act(() => {
-        result.current.game.startGame(contributorsFixture.slice(0, 2), {
-          pairsOfCards: 2,
-          durationInSeconds: 2,
-          scoreMultiplier: 10,
-          timeUntilFaceDownCardsInSeconds: 0.01,
-        });
-      });
+      startGame(result, contributorsFixture.slice(0, 2));
 
       const firstCard = result.current.state.cards[0]!;
       const secondCard = result.current.state.cards.find(
@@ -102,6 +132,8 @@ describe('useGame', () => {
       });
 
       expect(result.current.game.isMovePending).toBe(true);
+      expect(result.current.state.errors).toBe(1);
+      expect(result.current.state.streak).toBe(0);
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(10);
@@ -121,14 +153,7 @@ describe('useGame', () => {
     try {
       const { result } = renderGame();
 
-      act(() => {
-        result.current.game.startGame(contributorsFixture.slice(0, 2), {
-          pairsOfCards: 2,
-          durationInSeconds: 2,
-          scoreMultiplier: 10,
-          timeUntilFaceDownCardsInSeconds: 0.01,
-        });
-      });
+      startGame(result, contributorsFixture.slice(0, 2));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(1000);
@@ -143,6 +168,8 @@ describe('useGame', () => {
       expect(result.current.state.timer).toBe(0);
       expect(result.current.state.status).toBe('finished');
       expect(result.current.state.isGameOver).toBe(true);
+      expect(result.current.state.outcome).toBe('lost');
+      expect(result.current.state.finalScore).toBe(0);
     } finally {
       vi.useRealTimers();
     }
@@ -151,10 +178,14 @@ describe('useGame', () => {
   it('rejects games without enough contributors', () => {
     const { result } = renderGame();
 
+    act(() => {
+      result.current.game.setRepository(repository);
+    });
+
     expect(() => {
       act(() => {
         result.current.game.startGame(contributorsFixture.slice(0, 1), {
-          pairsOfCards: 2,
+          config: { pairsOfCards: 2 },
         });
       });
     }).toThrow('Se necesitan al menos 2 contribuyentes para iniciar la partida.');

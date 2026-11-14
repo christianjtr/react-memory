@@ -76,7 +76,7 @@ describe('GameBoard', () => {
     await user.click(cards[0]!);
     await user.click(cards[1]!);
 
-    expect(await screen.findByText('Score: 100')).toBeInTheDocument();
+    expect(await screen.findByText('Score: 150')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /pareja encontrada/ })).toHaveLength(2);
   });
 
@@ -120,8 +120,8 @@ describe('GameBoard', () => {
 
     const dialog = await screen.findByRole('dialog');
 
-    expect(within(dialog).getByText('GAME OVER')).toBeInTheDocument();
-    expect(within(dialog).getByText('Score: 600')).toBeInTheDocument();
+    expect(within(dialog).getByText('¡VICTORIA!')).toBeInTheDocument();
+    expect(within(dialog).getByText(/^Score: \d+$/)).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole('button', { name: 'New game!' }));
 

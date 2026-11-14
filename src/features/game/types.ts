@@ -1,4 +1,10 @@
-import type { Contributor } from '@/features/contributors/types';
+import type { Contributor, Repository } from '@/features/contributors/types';
+
+export type DifficultyId = 'easy' | 'normal' | 'hard';
+
+export type GameMode = 'classic' | 'daily';
+
+export type GameOutcome = 'won' | 'lost';
 
 export interface GameConfig {
   readonly durationInSeconds: number;
@@ -16,6 +22,13 @@ export interface GameCard {
   readonly isMatched: boolean;
 }
 
+export interface GameRound {
+  readonly mode: GameMode;
+  readonly difficulty: DifficultyId;
+  readonly repository: Repository;
+  readonly startedAt: number;
+}
+
 export interface GameState {
   readonly cards: readonly GameCard[];
   readonly foundContributorIds: readonly number[];
@@ -26,4 +39,15 @@ export interface GameState {
   readonly status: GameStatus;
   readonly pendingResolution: 'none' | 'mismatch';
   readonly isGameOver: boolean;
+  readonly mode: GameMode;
+  readonly difficulty: DifficultyId;
+  readonly repository: Repository | null;
+  readonly round: GameRound | null;
+  readonly moves: number;
+  readonly errors: number;
+  readonly streak: number;
+  readonly bestStreak: number;
+  readonly streakPoints: number;
+  readonly outcome: GameOutcome | null;
+  readonly finalScore: number | null;
 }

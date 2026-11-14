@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { motion } from 'motion/react';
 import { useGithubContributors } from '@/features/contributors/hooks/useGithubContributors';
-import type { Repository } from '@/features/contributors/types';
 import {
   formatRepository,
   getInitialRepository,
@@ -16,36 +15,50 @@ import { GameOverModal } from '../GameOverModal/GameOverModal';
 import { useGame } from '../../hooks/useGame';
 import { useBestScore } from '../../hooks/useBestScore';
 import { useGameState } from '../../hooks/useGameContext';
-import {
-  DEFAULT_DIFFICULTY,
-  getDifficulty,
-  type DifficultyId,
-} from '../../lib/difficulty';
+import { getDifficulty, type DifficultyId } from '../../lib/difficulty';
 
 export function GameBoard(): ReactElement {
-  const { cards, status, score, isGameOver, pendingResolution, selectedCardIds } =
-    useGameState();
+  const {
+    cards,
+    status,
+    score,
+    finalScore,
+    isGameOver,
+    pendingResolution,
+    selectedCardIds,
+    difficulty,
+    repository,
+  } = useGameState();
   const { contributors, isLoading, error, fetchData } = useGithubContributors();
-  const { selectCard, startGame, resetGame, isMovePending } = useGame();
+  const { selectCard, startGame, resetGame, setDifficulty, setRepository, isMovePending } =
+    useGame();
   const { bestScore, submitScore } = useBestScore();
   const [gameError, setGameError] = useState<string | null>(null);
-  const [difficulty, setDifficulty] = useState<DifficultyId>(DEFAULT_DIFFICULTY);
-  const [repository, setRepository] = useState<Repository>(getInitialRepository);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const previousBestScore = useRef(bestScore);
+  const hasInitializedRepository = useRef(false);
+
+  useEffect(() => {
+    if (hasInitializedRepository.current) return;
+
+    hasInitializedRepository.current = true;
+    setRepository(getInitialRepository());
+  }, [setRepository]);
 
   const startNewGame = useCallback((): void => {
     try {
-      startGame(contributors, getDifficulty(difficulty).config);
+      startGame(contributors);
       setGameError(null);
     } catch (caught) {
       setGameError(
         caught instanceof Error ? caught.message : 'No se pudo iniciar la partida.',
       );
     }
-  }, [contributors, difficulty, startGame]);
+  }, [contributors, startGame]);
 
   useEffect(() => {
+    if (repository === null) return;
+
     void fetchData(repository);
   }, [fetchData, repository]);
 
@@ -62,35 +75,42 @@ export function GameBoard(): ReactElement {
       return;
     }
 
-    const isRecord = score > previousBestScore.current;
+    const submittedScore = finalScore ?? score;
+    const isRecord = submittedScore > previousBestScore.current;
     setIsNewRecord(isRecord);
 
     if (isRecord) {
-      submitScore(score);
+      submitScore(submittedScore);
     }
-  }, [bestScore, isGameOver, score, submitScore]);
+  }, [bestScore, finalScore, isGameOver, score, submitScore]);
 
   const handleRetry = (): void => {
+    if (repository === null) return;
+
     void fetchData(repository);
   };
 
   const handleNewRepository = useCallback((): void => {
     resetGame();
     setGameError(null);
-    setRepository((currentRepository) => pickRandomRepository(currentRepository));
-  }, [resetGame]);
+    setRepository(pickRandomRepository(repository ?? undefined));
+  }, [repository, resetGame, setRepository]);
 
   const handleTryAnotherRepository = (): void => {
     handleNewRepository();
   };
 
-  const handleDifficultyChange = (nextDifficulty: DifficultyId): void => {
-    setDifficulty(nextDifficulty);
-  };
+  const handleDifficultyChange = useCallback(
+    (nextDifficulty: DifficultyId): void => {
+      setDifficulty(nextDifficulty);
+    },
+    [setDifficulty],
+  );
 
   const isBoardDisabled = isMovePending || status !== 'playing';
   const mismatchCardIds = pendingResolution === 'mismatch' ? selectedCardIds : [];
   const pairCount = getDifficulty(difficulty).config.pairsOfCards;
+  const repositoryLabel = repository === null ? '—' : formatRepository(repository);
 
   const renderContent = (): ReactElement => {
     if (error !== null || gameError !== null) {
@@ -125,7 +145,7 @@ export function GameBoard(): ReactElement {
             Cargando contribuyentes...
           </p>
           <p className="mb-4 text-center text-xs font-semibold text-violet-500/80">
-            Repositorio: {formatRepository(repository)}
+            Repositorio: {repositoryLabel}
           </p>
           <BoardSkeleton count={pairCount * 2} />
         </div>
@@ -163,7 +183,7 @@ export function GameBoard(): ReactElement {
     <div className="relative flex min-h-screen flex-col">
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pb-4">
         <GameBoardHeader
-          repositoryName={formatRepository(repository)}
+          repositoryName={repositoryLabel}
           isShuffleDisabled={isLoading || status === 'idle'}
           onShuffle={handleNewRepository}
         />

@@ -16,15 +16,34 @@ describe('GameOverModal', () => {
     const user = userEvent.setup();
 
     renderWithGameState(<GameOverModal onOk={onOk} />, {
-      state: { isGameOver: true, status: 'finished', score: 600 },
+      state: { isGameOver: true, status: 'finished', score: 600, outcome: 'lost' },
     });
 
     expect(screen.getByText('GAME OVER')).toBeInTheDocument();
+    expect(screen.getByText('Se acabó el tiempo, ¡inténtalo de nuevo!')).toBeInTheDocument();
     expect(screen.getByText('Score: 600')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'New game!' }));
 
     expect(onOk).toHaveBeenCalledTimes(1);
+  });
+
+  it('celebrates a victory and prefers the final score', () => {
+    renderWithGameState(<GameOverModal onOk={vi.fn()} />, {
+      state: {
+        isGameOver: true,
+        status: 'finished',
+        score: 900,
+        finalScore: 1200,
+        outcome: 'won',
+      },
+    });
+
+    expect(screen.getByText('¡VICTORIA!')).toBeInTheDocument();
+    expect(
+      screen.getByText('Completaste todas las parejas a tiempo'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Score: 1200')).toBeInTheDocument();
   });
 
   it('restarts the game when the dialog is cancelled', () => {

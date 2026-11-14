@@ -14,9 +14,11 @@ export function GameOverModal({
   bestScore = 0,
   isNewRecord = false,
 }: GameOverModalProps): ReactElement | null {
-  const { isGameOver, score } = useGameState();
+  const { isGameOver, outcome, score, finalScore } = useGameState();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const isVictory = outcome === 'won';
+  const displayedScore = finalScore ?? score;
 
   useEffect(() => {
     if (!isGameOver) return;
@@ -59,7 +61,7 @@ export function GameOverModal({
       className="m-auto w-[calc(100%-2rem)] max-w-lg border-0 bg-transparent p-0 text-ink backdrop:bg-violet-950/45 backdrop:backdrop-blur-sm"
       aria-labelledby="game-over-title"
       onCancel={handleCancel}>
-      <ConfettiBurst active={isGameOver} />
+      <ConfettiBurst active={isVictory} />
 
       <motion.div
         className="relative overflow-hidden rounded-[2rem] border border-violet-200/70 bg-violet-50/95 shadow-2xl backdrop-blur-xl"
@@ -110,8 +112,14 @@ export function GameOverModal({
           <h2
             id="game-over-title"
             className="bg-[linear-gradient(90deg,#6d28d9,#d946ef_50%,#0891b2)] bg-clip-text text-4xl font-black tracking-wide text-transparent">
-            GAME OVER
+            {isVictory ? '¡VICTORIA!' : 'GAME OVER'}
           </h2>
+
+          <p className="mt-2 text-sm font-bold text-violet-600/85">
+            {isVictory
+              ? 'Completaste todas las parejas a tiempo'
+              : 'Se acabó el tiempo, ¡inténtalo de nuevo!'}
+          </p>
 
           {isNewRecord ? (
             <motion.p
@@ -123,7 +131,9 @@ export function GameOverModal({
             </motion.p>
           ) : null}
 
-          <p className="my-5 text-2xl font-black text-violet-900">Score: {score}</p>
+          <p className="my-5 text-2xl font-black text-violet-900">
+            Score: {displayedScore}
+          </p>
 
           {bestScore > 0 ? (
             <p className="-mt-3 mb-5 text-sm font-bold text-violet-600/80">
