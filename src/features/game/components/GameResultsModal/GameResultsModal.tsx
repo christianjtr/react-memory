@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactElement, type SyntheticEvent } from 'react';
 import { motion } from 'motion/react';
 import { ConfettiBurst } from '@/components/ui/ConfettiBurst';
+import { useShare } from '@/features/share/hooks/useShare';
 import { useGameState } from '../../hooks/useGameContext';
 import { getDifficulty } from '../../lib/difficulty';
 import { buildRoundResult } from '../../lib/roundResult';
@@ -32,6 +33,7 @@ export function GameResultsModal({
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const result = buildRoundResult(gameState);
   const isVictory = result?.outcome === 'won';
+  const { status: shareStatus, share } = useShare();
 
   useEffect(() => {
     if (!gameState.isGameOver) return;
@@ -66,6 +68,12 @@ export function GameResultsModal({
   const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
     event.preventDefault();
     onOk();
+  };
+
+  const handleShare = async (): Promise<void> => {
+    if (result === null) return;
+
+    await share(result, nickname ?? '');
   };
 
   const stats: StatItem[] = [
@@ -198,6 +206,15 @@ export function GameResultsModal({
           </dl>
 
           <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              disabled={shareStatus === 'sharing'}
+              className="rounded-2xl border border-violet-300 bg-white/80 px-5 py-3 text-base font-black text-violet-800 transition hover:bg-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => {
+                void handleShare();
+              }}>
+              {shareStatus === 'sharing' ? 'Compartiendo...' : 'Compartir'}
+            </button>
             {onOpenRecords !== undefined ? (
               <button
                 type="button"
@@ -214,6 +231,14 @@ export function GameResultsModal({
               New game!
             </button>
           </div>
+
+          <p
+            className="mt-3 min-h-5 text-sm font-bold text-violet-600/85"
+            aria-live="polite">
+            {shareStatus === 'shared' ? '¡Resultado compartido!' : null}
+            {shareStatus === 'copied' ? 'Enlace copiado al portapapeles.' : null}
+            {shareStatus === 'failed' ? 'No se pudo compartir el resultado.' : null}
+          </p>
         </div>
       </motion.div>
     </dialog>
