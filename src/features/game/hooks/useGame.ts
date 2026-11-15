@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import type { Contributor, Repository } from '@/features/contributors/types';
-import type { RandomSource } from '@/lib/random';
+import { createSeededRandomFromString, type RandomSource } from '@/lib/random';
 import { GAME_ACTION_TYPES } from '../context/gameActions';
 import { resolveGameConfig } from '../context/gameState';
 import { buildDeck } from '../lib/deck';
@@ -58,8 +58,8 @@ export function useGame() {
   );
 
   const setMode = useCallback(
-    (mode: GameMode): void => {
-      dispatch({ type: GAME_ACTION_TYPES.SET_MODE, payload: { mode } });
+    (mode: GameMode, seed?: string | null): void => {
+      dispatch({ type: GAME_ACTION_TYPES.SET_MODE, payload: { mode, seed } });
     },
     [dispatch],
   );
@@ -79,7 +79,12 @@ export function useGame() {
         ...getDifficulty(state.difficulty).config,
         ...options?.config,
       });
-      const cards = buildDeck(contributors, config.pairsOfCards, options?.random);
+      const random =
+        options?.random ??
+        (state.mode === 'daily' && state.seed !== null
+          ? createSeededRandomFromString(state.seed)
+          : undefined);
+      const cards = buildDeck(contributors, config.pairsOfCards, random);
 
       dispatch({
         type: GAME_ACTION_TYPES.START_GAME,
@@ -92,7 +97,7 @@ export function useGame() {
         },
       });
     },
-    [dispatch, state.difficulty, state.mode, state.repository],
+    [dispatch, state.difficulty, state.mode, state.repository, state.seed],
   );
 
   return {

@@ -34,9 +34,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case GAME_ACTION_TYPES.SET_MODE: {
-      if (state.mode === action.payload.mode) return state;
+      const seed = action.payload.seed ?? null;
 
-      return { ...state, mode: action.payload.mode };
+      if (state.mode === action.payload.mode && state.seed === seed) return state;
+
+      return { ...state, mode: action.payload.mode, seed };
     }
 
     case GAME_ACTION_TYPES.START_GAME: {

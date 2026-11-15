@@ -3,6 +3,7 @@ import type { PropsWithChildren, ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { Contributor, Repository } from '@/features/contributors/types';
 import { contributorsFixture } from '@/test/fixtures/contributors';
+import { createSeededRandom } from '@/lib/random';
 import { GameProvider } from '../context/GameContext';
 import type { GameConfig } from '../types';
 import { useGame } from './useGame';
@@ -189,5 +190,101 @@ describe('useGame', () => {
         });
       });
     }).toThrow('Se necesitan al menos 2 contribuyentes para iniciar la partida.');
+  });
+
+  it('builds a deterministic deck in daily mode from the state seed', () => {
+    const { result } = renderGame();
+
+    act(() => {
+      result.current.game.setRepository(repository);
+      result.current.game.setMode('daily', 'github-memory:daily:2026-01-01');
+    });
+
+    act(() => {
+      result.current.game.startGame(contributorsFixture, { config: testConfig });
+    });
+
+    const firstDeck = result.current.state.cards.map(
+      (card) => card.contributor.id,
+    );
+
+    act(() => {
+      result.current.game.startGame(contributorsFixture, { config: testConfig });
+    });
+
+    const secondDeck = result.current.state.cards.map(
+      (card) => card.contributor.id,
+    );
+
+    expect(firstDeck).toEqual(secondDeck);
+    expect(result.current.state.round).toMatchObject({ mode: 'daily' });
+  });
+
+  it('builds a different deck for a different daily seed', () => {
+    const { result } = renderGame();
+
+    act(() => {
+      result.current.game.setRepository(repository);
+      result.current.game.setMode('daily', 'github-memory:daily:2026-01-01');
+    });
+
+    act(() => {
+      result.current.game.startGame(contributorsFixture, { config: testConfig });
+    });
+
+    const firstDeck = result.current.state.cards.map(
+      (card) => card.contributor.id,
+    );
+
+    act(() => {
+      result.current.game.setMode('daily', 'github-memory:daily:2026-01-02');
+    });
+
+    act(() => {
+      result.current.game.startGame(contributorsFixture, { config: testConfig });
+    });
+
+    const secondDeck = result.current.state.cards.map(
+      (card) => card.contributor.id,
+    );
+
+    expect(firstDeck).not.toEqual(secondDeck);
+  });
+
+  it('lets an explicit random source override the daily seed', () => {
+    const { result } = renderGame();
+
+    act(() => {
+      result.current.game.setRepository(repository);
+      result.current.game.setMode('daily', 'github-memory:daily:2026-01-01');
+    });
+
+    act(() => {
+      result.current.game.startGame(contributorsFixture, {
+        config: testConfig,
+        random: createSeededRandom(12345),
+      });
+    });
+
+    const firstDeck = result.current.state.cards.map(
+      (card) => card.contributor.id,
+    );
+
+    act(() => {
+      result.current.game.setMode('daily', 'github-memory:daily:2026-01-02');
+    });
+
+    act(() => {
+      result.current.game.startGame(contributorsFixture, {
+        config: testConfig,
+        random: createSeededRandom(12345),
+      });
+    });
+
+    const secondDeck = result.current.state.cards.map(
+      (card) => card.contributor.id,
+    );
+
+    expect(firstDeck).toEqual(secondDeck);
   });
 });

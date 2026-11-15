@@ -373,6 +373,24 @@ describe('gameReducer', () => {
     expect(withMode).toBe(withRepository);
   });
 
+  it('stores the daily seed and clears it when returning to classic', () => {
+    const withSeed = gameReducer(INITIAL_GAME_STATE, {
+      type: GAME_ACTION_TYPES.SET_MODE,
+      payload: { mode: 'daily', seed: 'github-memory:daily:2026-01-01' },
+    });
+
+    expect(withSeed.mode).toBe('daily');
+    expect(withSeed.seed).toBe('github-memory:daily:2026-01-01');
+
+    const withClassic = gameReducer(withSeed, {
+      type: GAME_ACTION_TYPES.SET_MODE,
+      payload: { mode: 'classic' },
+    });
+
+    expect(withClassic.mode).toBe('classic');
+    expect(withClassic.seed).toBeNull();
+  });
+
   it('rejects unknown actions', () => {
     expect(() =>
       gameReducer(startGame(), { type: 'UNKNOWN' } as unknown as GameAction),

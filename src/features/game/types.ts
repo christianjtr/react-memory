@@ -40,6 +40,7 @@ export interface GameState {
   readonly pendingResolution: 'none' | 'mismatch';
   readonly isGameOver: boolean;
   readonly mode: GameMode;
+  readonly seed: string | null;
   readonly difficulty: DifficultyId;
   readonly repository: Repository | null;
   readonly round: GameRound | null;

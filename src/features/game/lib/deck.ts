@@ -16,7 +16,7 @@ export function buildDeck(
     ...new Map(
       contributors.map((contributor) => [contributor.id, contributor] as const),
     ).values(),
-  ];
+  ].sort((first, second) => first.id - second.id);
 
   if (uniqueContributors.length < numberOfPairs) {
     throw new RangeError(

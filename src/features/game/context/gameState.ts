@@ -18,6 +18,7 @@ export const INITIAL_GAME_STATE: GameState = {
   pendingResolution: 'none',
   isGameOver: false,
   mode: 'classic',
+  seed: null,
   difficulty: 'normal',
   repository: null,
   round: null,

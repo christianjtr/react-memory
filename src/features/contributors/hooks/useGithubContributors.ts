@@ -9,12 +9,14 @@ import type { Contributor, Repository } from '../types';
 
 interface GithubContributorsState {
   contributors: Contributor[];
+  contributorsRepository: Repository | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const INITIAL_STATE: GithubContributorsState = {
   contributors: [],
+  contributorsRepository: null,
   isLoading: false,
   error: null,
 };
@@ -43,7 +45,12 @@ export function useGithubContributors() {
 
     if (cachedContributors !== undefined) {
       activeRequest.current = null;
-      setState({ contributors: [...cachedContributors], isLoading: false, error: null });
+      setState({
+        contributors: [...cachedContributors],
+        contributorsRepository: requestedRepository,
+        isLoading: false,
+        error: null,
+      });
       return;
     }
 
@@ -69,12 +76,18 @@ export function useGithubContributors() {
       }
 
       contributorsCache.set(getRepositoryKey(requestedRepository), contributors);
-      setState({ contributors: [...contributors], isLoading: false, error: null });
+      setState({
+        contributors: [...contributors],
+        contributorsRepository: requestedRepository,
+        isLoading: false,
+        error: null,
+      });
     } catch (error) {
       if (controller.signal.aborted) return;
 
       setState({
         contributors: [],
+        contributorsRepository: null,
         isLoading: false,
         error:
           error instanceof Error

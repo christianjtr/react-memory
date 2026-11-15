@@ -4,8 +4,12 @@ import { useGithubContributors } from '@/features/contributors/hooks/useGithubCo
 import {
   formatRepository,
   getInitialRepository,
+  isSameRepository,
   pickRandomRepository,
 } from '@/features/contributors/lib/repositories';
+import { DailyChallengePanel } from '@/features/daily/components/DailyChallengePanel';
+import { DAILY_DIFFICULTY } from '@/features/daily/lib/dailyChallenge';
+import { useDailyChallenge } from '@/features/daily/hooks/useDailyChallenge';
 import { PlayerSettingsModal } from '@/features/player/components/PlayerSettingsModal';
 import { usePlayerProfile } from '@/features/player/hooks/usePlayerProfile';
 import { RecordsModal } from '@/features/records/components/RecordsModal';
@@ -32,11 +36,20 @@ export function GameBoard(): ReactElement {
     difficulty,
     repository,
   } = gameState;
-  const { contributors, isLoading, error, fetchData } = useGithubContributors();
-  const { selectCard, startGame, resetGame, setDifficulty, setRepository, isMovePending } =
+  const { contributors, contributorsRepository, isLoading, error, fetchData } =
+    useGithubContributors();
+  const { selectCard, startGame, resetGame, setDifficulty, setRepository, setMode, isMovePending } =
     useGame();
   const { profile, saveNickname } = usePlayerProfile();
   const { records, saveRound } = useRecords();
+  const {
+    challenge,
+    hasPlayedToday,
+    todayScore,
+    bestScore: dailyBestScore,
+    secondsUntilNext,
+    saveDailyResult,
+  } = useDailyChallenge();
   const [gameError, setGameError] = useState<string | null>(null);
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [isPlayerSettingsOpen, setIsPlayerSettingsOpen] = useState(false);
@@ -73,9 +86,11 @@ export function GameBoard(): ReactElement {
 
   useEffect(() => {
     if (contributors.length === 0) return;
+    if (contributorsRepository === null || repository === null) return;
+    if (!isSameRepository(contributorsRepository, repository)) return;
 
     startNewGame();
-  }, [contributors, startNewGame]);
+  }, [contributors, contributorsRepository, repository, startNewGame]);
 
   useEffect(() => {
     if (!isGameOver) {
@@ -92,21 +107,25 @@ export function GameBoard(): ReactElement {
     if (recordedRoundRef.current === startedAt) return;
     recordedRoundRef.current = startedAt;
 
+    if (result.mode === 'daily') {
+      setIsNewRecord(result.score > dailyBestScore);
+      saveDailyResult(result.score);
+      return;
+    }
+
     setIsNewRecord(result.score > previousBestScore.current);
 
-    if (result.mode === 'classic') {
-      saveRound({
-        difficulty: result.difficulty,
-        score: result.score,
-        accuracy: result.accuracy,
-        elapsedSeconds: result.elapsedSeconds,
-        pairsFound: result.pairsFound,
-        errors: result.errors,
-        bestStreak: result.bestStreak,
-        won: result.outcome === 'won',
-      });
-    }
-  }, [bestScore, gameState, isGameOver, saveRound]);
+    saveRound({
+      difficulty: result.difficulty,
+      score: result.score,
+      accuracy: result.accuracy,
+      elapsedSeconds: result.elapsedSeconds,
+      pairsFound: result.pairsFound,
+      errors: result.errors,
+      bestStreak: result.bestStreak,
+      won: result.outcome === 'won',
+    });
+  }, [bestScore, dailyBestScore, gameState, isGameOver, saveDailyResult, saveRound]);
 
   const handleRetry = (): void => {
     if (repository === null) return;
@@ -117,8 +136,17 @@ export function GameBoard(): ReactElement {
   const handleNewRepository = useCallback((): void => {
     resetGame();
     setGameError(null);
+    setMode('classic');
     setRepository(pickRandomRepository(repository ?? undefined));
-  }, [repository, resetGame, setRepository]);
+  }, [repository, resetGame, setMode, setRepository]);
+
+  const handlePlayDaily = useCallback((): void => {
+    resetGame();
+    setGameError(null);
+    setMode('daily', challenge.seed);
+    setDifficulty(DAILY_DIFFICULTY);
+    setRepository(challenge.repository);
+  }, [challenge, resetGame, setDifficulty, setMode, setRepository]);
 
   const handleTryAnotherRepository = (): void => {
     handleNewRepository();
@@ -135,6 +163,8 @@ export function GameBoard(): ReactElement {
   const mismatchCardIds = pendingResolution === 'mismatch' ? selectedCardIds : [];
   const pairCount = getDifficulty(difficulty).config.pairsOfCards;
   const repositoryLabel = repository === null ? '—' : formatRepository(repository);
+  const isDailyMode = gameState.mode === 'daily';
+  const displayBestScore = isDailyMode ? dailyBestScore : bestScore;
 
   const renderContent = (): ReactElement => {
     if (error !== null || gameError !== null) {
@@ -215,10 +245,25 @@ export function GameBoard(): ReactElement {
           onOpenRecords={() => setIsRecordsOpen(true)}
         />
 
+        <DailyChallengePanel
+          challenge={challenge}
+          hasPlayedToday={hasPlayedToday}
+          todayScore={todayScore}
+          bestScore={dailyBestScore}
+          secondsUntilNext={secondsUntilNext}
+          isPlayDisabled={isLoading}
+          onPlay={handlePlayDaily}
+        />
+
         <div className="mb-4 flex flex-col items-center gap-1.5">
           <DifficultySelector
             value={difficulty}
-            disabled={isLoading || status === 'idle' || contributors.length === 0}
+            disabled={
+              isLoading ||
+              status === 'idle' ||
+              contributors.length === 0 ||
+              isDailyMode
+            }
             onChange={handleDifficultyChange}
           />
           <p className="text-[0.65rem] font-semibold text-violet-500/80">
@@ -232,13 +277,13 @@ export function GameBoard(): ReactElement {
           {renderContent()}
         </section>
 
-        <GameBoardFooter bestScore={bestScore} />
+        <GameBoardFooter bestScore={displayBestScore} />
       </main>
 
       <GameResultsModal
         onOk={handleNewRepository}
         onOpenRecords={() => setIsRecordsOpen(true)}
-        bestScore={bestScore}
+        bestScore={displayBestScore}
         isNewRecord={isNewRecord}
         nickname={profile.nickname}
       />

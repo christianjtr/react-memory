@@ -45,5 +45,5 @@ export type GameAction =
     }
   | {
       readonly type: typeof GAME_ACTION_TYPES.SET_MODE;
-      readonly payload: { readonly mode: GameMode };
+      readonly payload: { readonly mode: GameMode; readonly seed?: string | null };
     };

@@ -35,6 +35,7 @@ function renderBoard() {
 
 describe('GameBoard', () => {
   beforeEach(() => {
+    window.localStorage.clear();
     fetchRepositoryContributorsMock.mockReset();
     clearGithubContributorsCache();
   });
@@ -164,5 +165,39 @@ describe('GameBoard', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Se necesitan al menos 6 contribuyentes para iniciar la partida.',
     );
+  });
+
+  it('shows the daily challenge and locks it after playing', async () => {
+    fetchRepositoryContributorsMock.mockResolvedValue(githubContributorsFixture);
+    const user = userEvent.setup();
+
+    renderBoard();
+
+    const playButton = await screen.findByRole('button', { name: 'Jugar el reto' });
+    await user.click(playButton);
+
+    const cards = await screen.findAllByRole('button', { name: /boca abajo/ });
+    expect(cards).toHaveLength(12);
+
+    for (let index = 0; index < cards.length; index += 2) {
+      await user.click(cards[index]!);
+      await user.click(cards[index + 1]!);
+    }
+
+    const dialog = await screen.findByRole('dialog');
+
+    expect(within(dialog).getByText('¡VICTORIA!')).toBeInTheDocument();
+
+    expect(await screen.findByText(/Hoy: \d+ pts/)).toBeInTheDocument();
+    expect(screen.getByText(/Nuevo reto en/)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Jugar el reto' }),
+    ).not.toBeInTheDocument();
+
+    const daily = window.localStorage.getItem('github-memory:v2:daily');
+
+    expect(daily).not.toBeNull();
+    expect(daily).toContain('"lastPlayedDateKey":"');
+    expect(daily).toContain('"scores":{"');
   });
 });
