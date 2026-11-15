@@ -3,23 +3,37 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [develop]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
+      - 'vite.config.ts'
+      - 'tsconfig*.json'
+      - 'postcss.config.*'
+      - 'tailwind.config.*'
+      - 'eslint.config.*'
+      - '.prettierrc*'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -31,23 +45,14 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: GITHUB_ACTIONS=true npm run build
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish to demo branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --orphan deploy-demo
+          cp -R dist/. .
+          git add -A
+          git commit -m "Deploy ${GITHUB_SHA::7} to demo"
+          git push origin HEAD:demo --force

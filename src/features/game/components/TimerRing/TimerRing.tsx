@@ -7,8 +7,8 @@ export interface TimerRingProps {
   isRunning: boolean;
 }
 
-const SIZE = 108;
-const STROKE = 9;
+const SIZE = 96;
+const STROKE = 8;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
@@ -25,7 +25,7 @@ export function TimerRing({ timer, total, isRunning }: TimerRingProps): ReactEle
       : 'stroke-violet-500';
 
   return (
-    <div className="relative flex h-28 w-28 shrink-0 items-center justify-center">
+    <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
       {isCritical && isRunning ? (
         <span
           aria-hidden="true"
@@ -67,7 +67,7 @@ export function TimerRing({ timer, total, isRunning }: TimerRingProps): ReactEle
           Tiempo
         </span>
         <p
-          className={`text-sm font-black tabular-nums ${isCritical ? 'text-rose-600' : 'text-ink'}`}
+          className={`text-[0.8rem] font-black tabular-nums ${isCritical ? 'text-rose-600' : 'text-ink'}`}
           aria-live="polite">
           {timer} s
         </p>

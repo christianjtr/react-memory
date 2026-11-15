@@ -23,7 +23,7 @@ export function GameBoardFooter({
 
   return (
     <footer className="mb-4 grid w-full gap-3 sm:grid-cols-[auto_1fr]">
-      <div className="flex items-center gap-3 rounded-3xl border border-violet-200/70 bg-white/90 p-3 shadow-card backdrop-blur-md sm:pr-5">
+      <div className="flex items-center gap-2.5 rounded-3xl border border-violet-200/70 bg-white/90 p-2.5 shadow-card backdrop-blur-md sm:pr-4">
         <TimerRing
           timer={timer}
           total={config.durationInSeconds}
@@ -39,7 +39,7 @@ export function GameBoardFooter({
         </div>
       </div>
 
-      <div className="flex flex-col justify-center rounded-3xl border border-violet-200/70 bg-white/90 p-4 shadow-card backdrop-blur-md">
+      <div className="flex flex-col justify-center rounded-3xl border border-violet-200/70 bg-white/90 p-3 shadow-card backdrop-blur-md">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.6rem] font-bold tracking-[0.22em] text-violet-500 uppercase">
@@ -47,7 +47,7 @@ export function GameBoardFooter({
             </p>
             <motion.p
               key={score}
-              className="text-2xl font-black text-ink tabular-nums"
+              className="text-xl font-black text-ink tabular-nums sm:text-2xl"
               aria-live="polite"
               initial={{ scale: 0.82, opacity: 0.4 }}
               animate={{ scale: 1, opacity: 1 }}
