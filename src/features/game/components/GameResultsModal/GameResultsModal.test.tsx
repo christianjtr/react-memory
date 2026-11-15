@@ -106,4 +106,30 @@ describe('GameResultsModal', () => {
 
     expect(onOpenRecords).toHaveBeenCalledTimes(1);
   });
+
+  it('copies only the game link and closes the share menu', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+
+    renderWithGameState(<GameResultsModal onOk={vi.fn()} />, { state: finishedState });
+
+    await user.click(screen.getByRole('button', { name: 'Compartir' }));
+    expect(
+      screen.getByRole('menu', { name: 'Opciones para compartir' }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('menuitem', { name: 'Copiar enlace' }));
+
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(
+      'https://github.com/christianjtr/react-memory',
+    );
+    expect(
+      screen.queryByRole('menu', { name: 'Opciones para compartir' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Enlace copiado al portapapeles.')).toBeInTheDocument();
+  });
 });

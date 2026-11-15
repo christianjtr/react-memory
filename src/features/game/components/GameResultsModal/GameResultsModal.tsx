@@ -8,7 +8,6 @@ import {
 import { motion } from 'motion/react';
 import { ConfettiBurst } from '@/components/ui/ConfettiBurst';
 import { useShare } from '@/features/share/hooks/useShare';
-import { ShareMenu } from '@/features/share/components/ShareMenu/ShareMenu';
 import { useGameState } from '../../hooks/useGameContext';
 import { getDifficulty } from '../../lib/difficulty';
 import { buildRoundResult } from '../../lib/roundResult';
@@ -40,16 +39,7 @@ export function GameResultsModal({
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const result = buildRoundResult(gameState);
   const isVictory = result?.outcome === 'won';
-  const {
-    payload: sharePayload,
-    cardUrl,
-    status: shareStatus,
-    prepareShare,
-    shareTo,
-    copyLink,
-    downloadImage,
-    reset: resetShare,
-  } = useShare();
+  const { status: shareStatus, copyLink, reset: resetShare } = useShare();
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -89,11 +79,12 @@ export function GameResultsModal({
   };
 
   const handleShareToggle = (): void => {
-    if (!isShareMenuOpen && result !== null) {
-      void prepareShare(result, nickname ?? '');
-    }
-
     setIsShareMenuOpen((open) => !open);
+  };
+
+  const handleCopyLink = async (): Promise<void> => {
+    await copyLink();
+    setIsShareMenuOpen(false);
   };
 
   const closeShareMenu = (): void => {
@@ -241,17 +232,39 @@ export function GameResultsModal({
                 Compartir
               </button>
               {isShareMenuOpen ? (
-                <ShareMenu
-                  payload={sharePayload}
-                  cardUrl={cardUrl}
-                  status={shareStatus}
-                  onShareTo={shareTo}
-                  onCopy={() => {
-                    void copyLink();
-                  }}
-                  onDownload={downloadImage}
-                  onClose={closeShareMenu}
-                />
+                <>
+                  <button
+                    type="button"
+                    aria-label="Cerrar opciones de compartir"
+                    className="fixed inset-0 z-30 cursor-default"
+                    onClick={closeShareMenu}
+                  />
+                  <div
+                    role="menu"
+                    aria-label="Opciones para compartir"
+                    className="absolute bottom-full left-1/2 z-40 mb-2 w-56 -translate-x-1/2 rounded-2xl border border-violet-200 bg-white p-2 shadow-xl">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-violet-900 transition hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+                      onClick={() => void handleCopyLink()}>
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        className="h-4 w-4">
+                        <path
+                          d="M10 13a5 5 0 0 0 7.1 0l3-3A5 5 0 0 0 13 2.9l-1.7 1.7m2.7 6.4a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Copiar enlace
+                    </button>
+                  </div>
+                </>
               ) : null}
             </div>
             {onOpenRecords !== undefined ? (
