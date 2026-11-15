@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { RoundResult } from '@/features/game/lib/roundResult';
-import { buildSharePayload, sharePayload } from '../lib/share';
+import { buildSharePayload, shareDailyResult, sharePayload } from '../lib/share';
 import type { ShareStatus } from '../types';
 
 export function useShare() {
@@ -9,7 +9,10 @@ export function useShare() {
   const share = useCallback(async (result: RoundResult, nickname: string) => {
     setStatus('sharing');
 
-    const outcome = await sharePayload(buildSharePayload(result, nickname));
+    const outcome =
+      result.mode === 'daily'
+        ? await shareDailyResult(result)
+        : await sharePayload(buildSharePayload(result, nickname));
 
     setStatus(outcome.status);
 

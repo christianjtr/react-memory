@@ -8,8 +8,11 @@ import {
   fetchPreviewImage,
   isClipboardSupported,
   isShareSupported,
+  shareDailyResult,
   sharePayload,
 } from './share';
+import { applyDailyResult, createEmptyDailyState } from '@/features/daily/lib/dailyStore';
+import { getDailySeed } from '@/lib/random';
 
 const result: RoundResult = {
   mode: 'classic',
@@ -196,5 +199,60 @@ describe('share', () => {
     const outcome = await sharePayload(buildSharePayload(result, 'ada'));
 
     expect(outcome.status).toBe('failed');
+  });
+
+  it('shares the daily result with an explicit image file', async () => {
+    const { share } = installNavigator();
+    const imageFile = new File(['card-bytes'], 'card.png', { type: 'image/png' });
+
+    const outcome = await sharePayload({
+      title: 'Github Memory',
+      text: 'text',
+      url: REPOSITORY_URL,
+      imageFile,
+    });
+
+    expect(outcome.status).toBe('shared');
+    const data = share.mock.calls[0]?.[0] as ShareData;
+    expect(data.files).toEqual([imageFile]);
+  });
+
+  it('shares the daily result with the generated card and seeded invitation', async () => {
+    const { share } = installNavigator();
+    const dateKey = getDailySeed();
+    let dailyState = createEmptyDailyState();
+
+    dailyState = applyDailyResult(dailyState, dateKey, {
+      score: 1160,
+      elapsedSeconds: 18,
+      won: true,
+    }).state;
+    dailyState = applyDailyResult(dailyState, '2026-11-14', {
+      score: 800,
+      elapsedSeconds: 41,
+      won: true,
+    }).state;
+
+    window.localStorage.setItem('github-memory:v2:daily', JSON.stringify(dailyState));
+
+    const outcome = await shareDailyResult({
+      ...result,
+      mode: 'daily',
+      repositoryLabel: 'oven-sh/bun',
+    });
+
+    expect(outcome.status).toBe('shared');
+
+    const data = share.mock.calls[0]?.[0] as ShareData;
+
+    expect(data.title).toContain(`Reto diario ${dateKey}`);
+    expect(data.text).toContain('1160 puntos');
+    expect(data.text).toContain('Racha: 2 días');
+    expect(data.text).toContain('Mejor tiempo: 18s');
+    expect(data.text).toContain('mismo tablero');
+    expect(data.text).toContain(DEMO_URL);
+    expect(data.url).toBe(REPOSITORY_URL);
+    // jsdom has no canvas support, so the card degrades to a text-only share.
+    expect(data.files).toBeUndefined();
   });
 });

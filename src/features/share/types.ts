@@ -5,7 +5,8 @@ export interface SharePayload {
   readonly title: string;
   readonly text: string;
   readonly url: string;
-  readonly imageUrl: string;
+  readonly imageUrl?: string;
+  readonly imageFile?: File | null;
 }
 
 export interface ShareOutcome {

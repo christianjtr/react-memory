@@ -1,5 +1,10 @@
 import type { RoundResult } from '@/features/game/lib/roundResult';
 import { getDifficulty } from '@/features/game/lib/difficulty';
+import {
+  buildDailyShareCardModel,
+  buildDailyShareRequest,
+  renderDailyShareCard,
+} from './dailyShareCard';
 import type { ShareOutcome, SharePayload } from '../types';
 
 export const REPOSITORY_URL = 'https://github.com/christianjtr/react-memory';
@@ -63,10 +68,31 @@ async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
+export async function shareDailyResult(result: RoundResult): Promise<ShareOutcome> {
+  const model = buildDailyShareCardModel(result);
+  const blob = await renderDailyShareCard(model);
+  const imageFile =
+    blob === null
+      ? null
+      : new File([blob], `github-memory-daily-${model.dateKey}.png`, {
+          type: 'image/png',
+        });
+
+  return sharePayload({ ...buildDailyShareRequest(model), imageFile });
+}
+
+async function resolveImageFile(payload: SharePayload): Promise<File | null> {
+  if (payload.imageFile !== undefined) return payload.imageFile;
+
+  if (payload.imageUrl !== undefined) return fetchPreviewImage(payload.imageUrl);
+
+  return null;
+}
+
 export async function sharePayload(payload: SharePayload): Promise<ShareOutcome> {
   if (isShareSupported()) {
     try {
-      const image = await fetchPreviewImage(payload.imageUrl);
+      const image = await resolveImageFile(payload);
 
       if (image !== null && navigator.canShare?.({ files: [image] })) {
         await navigator.share({
