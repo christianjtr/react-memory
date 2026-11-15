@@ -17,8 +17,6 @@ https://christianjtr.github.io/react-memory
 
 ![Github Memory gameplay screenshot](samples/app-screenshot.png)
 
-![Github Memory gameplay demo](samples/app-demo.gif)
-
 ## Tech stack
 
 - React 19 + TypeScript 5.9
@@ -165,7 +163,3 @@ validation and mapping are isolated from UI components.
 - CI runs audit, lint, typecheck, tests with coverage and a production build on every
   push and pull request to `develop`.
 - The production build is deployed to GitHub Pages from `develop`.
-
-## Demo
-
-![](./samples/demo_v2.gif)
