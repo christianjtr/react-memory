@@ -71,13 +71,13 @@ describe('GameBoard', () => {
     const cards = await screen.findAllByRole('button', { name: /boca abajo/ });
 
     expect(cards).toHaveLength(12);
-    expect(screen.getByText('Time: 60')).toBeInTheDocument();
-    expect(screen.getByText('Score: 0')).toBeInTheDocument();
+    expect(screen.getByText('60 s')).toBeInTheDocument();
+    expect(screen.getByText('0', { selector: 'p' })).toBeInTheDocument();
 
     await user.click(cards[0]!);
     await user.click(cards[1]!);
 
-    expect(await screen.findByText('Score: 150')).toBeInTheDocument();
+    expect(await screen.findByText('150', { selector: 'p' })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /pareja encontrada/ })).toHaveLength(2);
   });
 
@@ -103,7 +103,7 @@ describe('GameBoard', () => {
     await user.click(screen.getByRole('button', { name: /Difícil/ }));
 
     expect(await screen.findAllByRole('button', { name: /boca abajo/ })).toHaveLength(16);
-    expect(screen.getByText('Time: 45')).toBeInTheDocument();
+    expect(screen.getByText('45 s')).toBeInTheDocument();
   });
 
   it('completes the game and starts a new one', async () => {

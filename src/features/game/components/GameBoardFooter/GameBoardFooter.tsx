@@ -22,8 +22,8 @@ export function GameBoardFooter({
   const hasStreak = streak >= 2;
 
   return (
-    <footer className="my-6 grid w-full gap-3 sm:grid-cols-[auto_1fr]">
-      <div className="flex items-center gap-3 rounded-3xl border border-violet-200/70 bg-violet-50/85 p-3 shadow-card backdrop-blur-md sm:pr-5">
+    <footer className="mb-4 grid w-full gap-3 sm:grid-cols-[auto_1fr]">
+      <div className="flex items-center gap-3 rounded-3xl border border-violet-200/70 bg-white/90 p-3 shadow-card backdrop-blur-md sm:pr-5">
         <TimerRing
           timer={timer}
           total={config.durationInSeconds}
@@ -39,7 +39,7 @@ export function GameBoardFooter({
         </div>
       </div>
 
-      <div className="flex flex-col justify-center rounded-3xl border border-violet-200/70 bg-violet-50/85 p-4 shadow-card backdrop-blur-md">
+      <div className="flex flex-col justify-center rounded-3xl border border-violet-200/70 bg-white/90 p-4 shadow-card backdrop-blur-md">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.6rem] font-bold tracking-[0.22em] text-violet-500 uppercase">
@@ -52,7 +52,7 @@ export function GameBoardFooter({
               initial={{ scale: 0.82, opacity: 0.4 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 420, damping: 20 }}>
-              Score: {score}
+              {score}
             </motion.p>
           </div>
 

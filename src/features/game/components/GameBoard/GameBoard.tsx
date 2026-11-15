@@ -284,10 +284,9 @@ export function GameBoard(): ReactElement {
         <section
           aria-label="Zona de juego"
           className="rounded-[2rem] border border-white/80 bg-violet-50/80 p-3 shadow-[0_34px_80px_-46px_rgb(76_29_149_/_0.85)] backdrop-blur-xl sm:p-5">
+          <GameBoardFooter bestScore={displayBestScore} />
           {renderContent()}
         </section>
-
-        <GameBoardFooter bestScore={displayBestScore} />
       </main>
 
       <GameResultsModal

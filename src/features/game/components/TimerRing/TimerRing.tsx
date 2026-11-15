@@ -69,7 +69,7 @@ export function TimerRing({ timer, total, isRunning }: TimerRingProps): ReactEle
         <p
           className={`text-sm font-black tabular-nums ${isCritical ? 'text-rose-600' : 'text-ink'}`}
           aria-live="polite">
-          Time: {timer}
+          {timer} s
         </p>
       </div>
     </div>

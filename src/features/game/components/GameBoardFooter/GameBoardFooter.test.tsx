@@ -15,7 +15,7 @@ describe('GameBoardFooter', () => {
       state: { status: 'playing', timer: 60, score: 100 },
     });
 
-    expect(screen.getByText('Time: 60')).toBeInTheDocument();
-    expect(screen.getByText('Score: 100')).toBeInTheDocument();
+    expect(screen.getByText('60 s')).toBeInTheDocument();
+    expect(screen.getByText('100', { selector: 'p' })).toBeInTheDocument();
   });
 });
