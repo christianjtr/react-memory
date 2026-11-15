@@ -5,7 +5,7 @@ import {
   buildDailyShareRequest,
   renderDailyShareCard,
 } from './dailyShareCard';
-import type { ShareOutcome, SharePayload } from '../types';
+import type { ShareChannel, SharePayload } from '../types';
 
 export const REPOSITORY_URL = 'https://github.com/christianjtr/react-memory';
 
@@ -27,12 +27,45 @@ export function buildSharePayload(result: RoundResult, nickname: string): ShareP
       `Jugá el reto: ${DEMO_URL}`,
     ].join('\n'),
     url: REPOSITORY_URL,
-    imageUrl: PREVIEW_IMAGE_URL,
   };
 }
 
-export function isShareSupported(): boolean {
-  return typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+export interface DailySharePrepared {
+  readonly payload: SharePayload;
+  readonly card: Blob | null;
+  readonly cardFileName: string;
+}
+
+export async function buildDailyShare(result: RoundResult): Promise<DailySharePrepared> {
+  const model = buildDailyShareCardModel(result);
+  const card = await renderDailyShareCard(model);
+
+  return {
+    payload: buildDailyShareRequest(model),
+    card,
+    cardFileName: `github-memory-daily-${model.dateKey}.png`,
+  };
+}
+
+export function buildShareText(payload: SharePayload): string {
+  return `${payload.text}\n${payload.url}`;
+}
+
+const CHANNEL_BUILDERS: Record<ShareChannel, (payload: SharePayload) => string> = {
+  whatsapp: (payload) =>
+    `https://wa.me/?text=${encodeURIComponent(buildShareText(payload))}`,
+  facebook: (payload) =>
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(payload.url)}&quote=${encodeURIComponent(payload.text)}`,
+  x: (payload) =>
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(payload.text)}&url=${encodeURIComponent(payload.url)}`,
+  telegram: (payload) =>
+    `https://t.me/share/url?url=${encodeURIComponent(payload.url)}&text=${encodeURIComponent(payload.text)}`,
+  linkedin: (payload) =>
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(payload.url)}`,
+};
+
+export function buildChannelUrl(channel: ShareChannel, payload: SharePayload): string {
+  return CHANNEL_BUILDERS[channel](payload);
 }
 
 export function isClipboardSupported(): boolean {
@@ -42,92 +75,21 @@ export function isClipboardSupported(): boolean {
   );
 }
 
-export async function fetchPreviewImage(imageUrl: string): Promise<File | null> {
-  try {
-    const response = await fetch(imageUrl, { mode: 'cors' });
-    if (!response.ok) return null;
-
-    const blob = await response.blob();
-
-    return new File([blob], 'github-memory.png', {
-      type: blob.type.length > 0 ? blob.type : 'image/png',
-    });
-  } catch {
-    return null;
-  }
-}
-
-async function copyToClipboard(text: string): Promise<boolean> {
+export async function copyShareText(payload: SharePayload): Promise<boolean> {
   if (!isClipboardSupported()) return false;
 
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(buildShareText(payload));
     return true;
   } catch {
     return false;
   }
 }
 
-export async function shareDailyResult(result: RoundResult): Promise<ShareOutcome> {
-  const model = buildDailyShareCardModel(result);
-  const blob = await renderDailyShareCard(model);
-  const imageFile =
-    blob === null
-      ? null
-      : new File([blob], `github-memory-daily-${model.dateKey}.png`, {
-          type: 'image/png',
-        });
+export function downloadBlob(blobUrl: string, fileName: string): void {
+  const anchor = document.createElement('a');
 
-  return sharePayload({ ...buildDailyShareRequest(model), imageFile });
-}
-
-async function resolveImageFile(payload: SharePayload): Promise<File | null> {
-  if (payload.imageFile !== undefined) return payload.imageFile;
-
-  if (payload.imageUrl !== undefined) return fetchPreviewImage(payload.imageUrl);
-
-  return null;
-}
-
-export async function sharePayload(payload: SharePayload): Promise<ShareOutcome> {
-  if (isShareSupported()) {
-    try {
-      const image = await resolveImageFile(payload);
-
-      if (image !== null && navigator.canShare?.({ files: [image] })) {
-        await navigator.share({
-          title: payload.title,
-          text: payload.text,
-          url: payload.url,
-          files: [image],
-        });
-
-        return { status: 'shared' };
-      }
-
-      await navigator.share({
-        title: payload.title,
-        text: payload.text,
-        url: payload.url,
-      });
-
-      return { status: 'shared' };
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        return { status: 'cancelled' };
-      }
-
-      const copied = await copyToClipboard(`${payload.text}\n${payload.url}`);
-
-      return copied
-        ? { status: 'copied' }
-        : { status: 'failed', message: 'No se pudo compartir el resultado.' };
-    }
-  }
-
-  const copied = await copyToClipboard(`${payload.text}\n${payload.url}`);
-
-  return copied
-    ? { status: 'copied' }
-    : { status: 'failed', message: 'No se pudo copiar el enlace.' };
+  anchor.href = blobUrl;
+  anchor.download = fileName;
+  anchor.click();
 }

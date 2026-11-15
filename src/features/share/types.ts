@@ -1,15 +1,9 @@
-export type ShareStatus =
-  'idle' | 'sharing' | 'shared' | 'copied' | 'cancelled' | 'failed';
+export type ShareStatus = 'idle' | 'copied' | 'failed';
+
+export type ShareChannel = 'whatsapp' | 'facebook' | 'x' | 'telegram' | 'linkedin';
 
 export interface SharePayload {
   readonly title: string;
   readonly text: string;
   readonly url: string;
-  readonly imageUrl?: string;
-  readonly imageFile?: File | null;
-}
-
-export interface ShareOutcome {
-  readonly status: Exclude<ShareStatus, 'idle' | 'sharing'>;
-  readonly message?: string;
 }

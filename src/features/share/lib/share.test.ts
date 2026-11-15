@@ -1,20 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RoundResult } from '@/features/game/lib/roundResult';
 import {
   DEMO_URL,
-  PREVIEW_IMAGE_URL,
   REPOSITORY_URL,
+  buildChannelUrl,
+  buildDailyShare,
   buildSharePayload,
-  fetchPreviewImage,
-  isClipboardSupported,
-  isShareSupported,
-  shareDailyResult,
-  sharePayload,
+  buildShareText,
+  copyShareText,
 } from './share';
-import { applyDailyResult, createEmptyDailyState } from '@/features/daily/lib/dailyStore';
-import { getDailySeed } from '@/lib/random';
 
-const result: RoundResult = {
+const classicResult: RoundResult = {
   mode: 'classic',
   difficulty: 'normal',
   repositoryLabel: 'facebook/react',
@@ -32,227 +28,134 @@ const result: RoundResult = {
   elapsedSeconds: 18,
 };
 
-function installNavigator(
-  options: {
-    share?: (data: ShareData) => Promise<void>;
-    canShare?: (data?: ShareData) => boolean;
-    clipboard?: boolean;
-  } = {},
-) {
-  const share = vi.fn(options.share ?? (async () => undefined));
-  const canShare = vi.fn(options.canShare ?? (() => true));
-  const writeText = vi.fn(async () => undefined);
-
-  Object.defineProperty(navigator, 'share', {
-    value: share,
-    configurable: true,
-    writable: true,
-  });
-  Object.defineProperty(navigator, 'canShare', {
-    value: canShare,
-    configurable: true,
-    writable: true,
-  });
-  Object.defineProperty(navigator, 'clipboard', {
-    value: options.clipboard === false ? undefined : { writeText },
-    configurable: true,
-    writable: true,
-  });
-
-  return { share, canShare, writeText };
-}
-
-function stubFetch(response: Partial<Response> | Error): void {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => {
-      if (response instanceof Error) throw response;
-      return response;
-    }),
-  );
-}
-
 describe('share', () => {
-  beforeEach(() => {
-    vi.unstubAllGlobals();
-  });
+  describe('buildSharePayload', () => {
+    it('composes the text with score, accuracy, streak and the demo url', () => {
+      const payload = buildSharePayload(classicResult, 'ada');
 
-  afterEach(() => {
-    Reflect.deleteProperty(navigator, 'share');
-    Reflect.deleteProperty(navigator, 'canShare');
-    Reflect.deleteProperty(navigator, 'clipboard');
-  });
-
-  it('builds a payload with the player score and the demo link', () => {
-    const payload = buildSharePayload(result, 'ada');
-
-    expect(payload.title).toContain('Github Memory');
-    expect(payload.title).toContain('ada');
-    expect(payload.title).toContain('1160');
-    expect(payload.text).toContain('1160 puntos');
-    expect(payload.text).toContain('86%');
-    expect(payload.text).toContain(DEMO_URL);
-    expect(payload.url).toBe(REPOSITORY_URL);
-    expect(payload.imageUrl).toBe(PREVIEW_IMAGE_URL);
-  });
-
-  it('falls back to a generic player name', () => {
-    expect(buildSharePayload(result, '').title).toContain('Un jugador');
-  });
-
-  it('detects the available share APIs', () => {
-    installNavigator();
-    expect(isShareSupported()).toBe(true);
-    expect(isClipboardSupported()).toBe(true);
-
-    installNavigator({ clipboard: false });
-    expect(isClipboardSupported()).toBe(false);
-  });
-
-  it('downloads the preview image when it is reachable', async () => {
-    const blob = new Blob(['image-bytes'], { type: 'image/png' });
-    stubFetch({ ok: true, blob: async () => blob });
-
-    const file = await fetchPreviewImage(PREVIEW_IMAGE_URL);
-
-    expect(file).not.toBeNull();
-    expect(file?.name).toBe('github-memory.png');
-    expect(file?.type).toBe('image/png');
-  });
-
-  it('returns null when the image is missing', async () => {
-    stubFetch({ ok: false, blob: async () => new Blob([]) });
-
-    expect(await fetchPreviewImage(PREVIEW_IMAGE_URL)).toBeNull();
-  });
-
-  it('returns null when the image request fails', async () => {
-    stubFetch(new Error('offline'));
-
-    expect(await fetchPreviewImage(PREVIEW_IMAGE_URL)).toBeNull();
-  });
-
-  it('shares the payload with the preview image attached', async () => {
-    const { share } = installNavigator();
-    const blob = new Blob(['image-bytes'], { type: 'image/png' });
-    stubFetch({ ok: true, blob: async () => blob });
-
-    const outcome = await sharePayload(buildSharePayload(result, 'ada'));
-
-    expect(outcome.status).toBe('shared');
-    expect(share).toHaveBeenCalledTimes(1);
-    const data = share.mock.calls[0]?.[0] as ShareData;
-    expect(data.url).toBe(REPOSITORY_URL);
-    expect(data.files).toHaveLength(1);
-  });
-
-  it('shares without files when the image is unreachable', async () => {
-    const { share } = installNavigator();
-    stubFetch(new Error('offline'));
-
-    const outcome = await sharePayload(buildSharePayload(result, 'ada'));
-
-    expect(outcome.status).toBe('shared');
-    const data = share.mock.calls[0]?.[0] as ShareData;
-    expect(data.files).toBeUndefined();
-  });
-
-  it('shares without files when the platform rejects them', async () => {
-    const { share } = installNavigator({ canShare: () => false });
-    const blob = new Blob(['image-bytes'], { type: 'image/png' });
-    stubFetch({ ok: true, blob: async () => blob });
-
-    const outcome = await sharePayload(buildSharePayload(result, 'ada'));
-
-    expect(outcome.status).toBe('shared');
-    const data = share.mock.calls[0]?.[0] as ShareData;
-    expect(data.files).toBeUndefined();
-  });
-
-  it('reports a cancelled share', async () => {
-    installNavigator({
-      share: async () => {
-        throw new DOMException('cancelled', 'AbortError');
-      },
+      expect(payload.title).toContain('ada sacó 1160 puntos');
+      expect(payload.text).toContain('1160 puntos');
+      expect(payload.text).toContain('Normal');
+      expect(payload.text).toContain('86%');
+      expect(payload.text).toContain('×6');
+      expect(payload.text).toContain(DEMO_URL);
+      expect(payload.url).toBe(REPOSITORY_URL);
     });
-    stubFetch(new Error('offline'));
 
-    const outcome = await sharePayload(buildSharePayload(result, 'ada'));
-
-    expect(outcome.status).toBe('cancelled');
+    it('falls back to an anonymous player label', () => {
+      expect(buildSharePayload(classicResult, '').title).toContain('Un jugador sacó');
+    });
   });
 
-  it('copies the link to the clipboard as a fallback', async () => {
-    const { writeText } = installNavigator({ clipboard: true });
-    Reflect.deleteProperty(navigator, 'share');
+  describe('buildDailyShare', () => {
+    it('builds the daily payload with the invitation text', async () => {
+      const prepared = await buildDailyShare({
+        ...classicResult,
+        mode: 'daily',
+        repositoryLabel: 'oven-sh/bun',
+      });
 
-    const outcome = await sharePayload(buildSharePayload(result, 'ada'));
+      expect(prepared.payload.title).toContain('Reto diario');
+      expect(prepared.payload.text).toContain('1160 puntos');
+      expect(prepared.payload.text).toContain('mismo tablero');
+      expect(prepared.cardFileName).toMatch(
+        /^github-memory-daily-\d{4}-\d{2}-\d{2}\.png$/,
+      );
+    });
 
-    expect(outcome.status).toBe('copied');
-    expect(writeText).toHaveBeenCalledTimes(1);
+    it('returns a null card when canvas rendering is not available', async () => {
+      const prepared = await buildDailyShare({
+        ...classicResult,
+        mode: 'daily',
+      });
+
+      expect(prepared.card).toBeNull();
+      expect(prepared.payload.text).toContain('mismo tablero');
+    });
   });
 
-  it('fails when no share or clipboard API is available', async () => {
-    installNavigator({ clipboard: false });
-    Reflect.deleteProperty(navigator, 'share');
-
-    const outcome = await sharePayload(buildSharePayload(result, 'ada'));
-
-    expect(outcome.status).toBe('failed');
-  });
-
-  it('shares the daily result with an explicit image file', async () => {
-    const { share } = installNavigator();
-    const imageFile = new File(['card-bytes'], 'card.png', { type: 'image/png' });
-
-    const outcome = await sharePayload({
+  describe('buildChannelUrl', () => {
+    const payload = {
       title: 'Github Memory',
-      text: 'text',
+      text: 'Saqué 1160 puntos',
       url: REPOSITORY_URL,
-      imageFile,
+    };
+
+    it('builds the whatsapp intent with the encoded text and link', () => {
+      expect(buildChannelUrl('whatsapp', payload)).toBe(
+        `https://wa.me/?text=${encodeURIComponent(`Saqué 1160 puntos\n${REPOSITORY_URL}`)}`,
+      );
     });
 
-    expect(outcome.status).toBe('shared');
-    const data = share.mock.calls[0]?.[0] as ShareData;
-    expect(data.files).toEqual([imageFile]);
+    it('builds the facebook sharer url with the link and quote', () => {
+      expect(buildChannelUrl('facebook', payload)).toBe(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(REPOSITORY_URL)}&quote=${encodeURIComponent('Saqué 1160 puntos')}`,
+      );
+    });
+
+    it('builds the x intent with the text and link', () => {
+      expect(buildChannelUrl('x', payload)).toBe(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent('Saqué 1160 puntos')}&url=${encodeURIComponent(REPOSITORY_URL)}`,
+      );
+    });
+
+    it('builds the telegram share url with the link and text', () => {
+      expect(buildChannelUrl('telegram', payload)).toBe(
+        `https://t.me/share/url?url=${encodeURIComponent(REPOSITORY_URL)}&text=${encodeURIComponent('Saqué 1160 puntos')}`,
+      );
+    });
+
+    it('builds the linkedin share url with the link', () => {
+      expect(buildChannelUrl('linkedin', payload)).toBe(
+        `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(REPOSITORY_URL)}`,
+      );
+    });
   });
 
-  it('shares the daily result with the generated card and seeded invitation', async () => {
-    const { share } = installNavigator();
-    const dateKey = getDailySeed();
-    let dailyState = createEmptyDailyState();
-
-    dailyState = applyDailyResult(dailyState, dateKey, {
-      score: 1160,
-      elapsedSeconds: 18,
-      won: true,
-    }).state;
-    dailyState = applyDailyResult(dailyState, '2026-11-14', {
-      score: 800,
-      elapsedSeconds: 41,
-      won: true,
-    }).state;
-
-    window.localStorage.setItem('github-memory:v2:daily', JSON.stringify(dailyState));
-
-    const outcome = await shareDailyResult({
-      ...result,
-      mode: 'daily',
-      repositoryLabel: 'oven-sh/bun',
+  describe('copyShareText', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
     });
 
-    expect(outcome.status).toBe('shared');
+    it('copies the text and the link to the clipboard', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
 
-    const data = share.mock.calls[0]?.[0] as ShareData;
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText },
+        configurable: true,
+      });
 
-    expect(data.title).toContain(`Reto diario ${dateKey}`);
-    expect(data.text).toContain('1160 puntos');
-    expect(data.text).toContain('Racha: 2 días');
-    expect(data.text).toContain('Mejor tiempo: 18s');
-    expect(data.text).toContain('mismo tablero');
-    expect(data.text).toContain(DEMO_URL);
-    expect(data.url).toBe(REPOSITORY_URL);
-    // jsdom has no canvas support, so the card degrades to a text-only share.
-    expect(data.files).toBeUndefined();
+      const copied = await copyShareText({
+        title: 'Github Memory',
+        text: 'Saqué 1160 puntos',
+        url: REPOSITORY_URL,
+      });
+
+      expect(copied).toBe(true);
+      expect(writeText).toHaveBeenCalledWith(`Saqué 1160 puntos\n${REPOSITORY_URL}`);
+    });
+
+    it('reports failure when the clipboard is not available', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        configurable: true,
+      });
+
+      const copied = await copyShareText({
+        title: 'Github Memory',
+        text: 'text',
+        url: REPOSITORY_URL,
+      });
+
+      expect(copied).toBe(false);
+    });
+  });
+
+  describe('buildShareText', () => {
+    it('joins the text and the url', () => {
+      expect(buildShareText({ title: 't', text: 'text', url: REPOSITORY_URL })).toBe(
+        `text\n${REPOSITORY_URL}`,
+      );
+    });
   });
 });
