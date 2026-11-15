@@ -9,6 +9,7 @@ export interface DailyChallengePanelProps {
   readonly hasPlayedToday: boolean;
   readonly todayScore: number | null;
   readonly bestScore: number;
+  readonly streak: number;
   readonly secondsUntilNext: number;
   readonly isPlayDisabled?: boolean;
   readonly onPlay?: () => void;
@@ -19,6 +20,7 @@ export function DailyChallengePanel({
   hasPlayedToday,
   todayScore,
   bestScore,
+  streak,
   secondsUntilNext,
   isPlayDisabled = false,
   onPlay,
@@ -57,7 +59,8 @@ export function DailyChallengePanel({
               Nuevo reto en {formatDailyCountdown(secondsUntilNext)}
             </p>
             <p className="text-[0.65rem] font-semibold text-fuchsia-600">
-              Mejor diario: {bestScore} pts
+              Racha: {streak} {streak === 1 ? 'día' : 'días'} · Mejor diario: {bestScore}{' '}
+              pts
             </p>
           </div>
         ) : (

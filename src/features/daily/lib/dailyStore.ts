@@ -1,5 +1,5 @@
 import { isPlainObject, readJson, STORAGE_KEYS, writeJson } from '@/lib/storage';
-import type { DailyState } from '../types';
+import type { DailyRoundResult, DailyState } from '../types';
 
 export const DAILY_VERSION = 1;
 
@@ -8,6 +8,7 @@ export function createEmptyDailyState(): DailyState {
     version: DAILY_VERSION,
     lastPlayedDateKey: null,
     bestScore: 0,
+    bestTimeInSeconds: null,
     scores: {},
   };
 }
@@ -45,6 +46,12 @@ export function readDailyState(): DailyState {
       stored.bestScore >= 0
         ? stored.bestScore
         : 0,
+    bestTimeInSeconds:
+      typeof stored.bestTimeInSeconds === 'number' &&
+      Number.isFinite(stored.bestTimeInSeconds) &&
+      stored.bestTimeInSeconds > 0
+        ? stored.bestTimeInSeconds
+        : null,
     scores: sanitizeScores(stored.scores),
   };
 }
@@ -66,26 +73,32 @@ export function getDailyScore(state: DailyState, dateKey: string): number | null
 export interface DailyResultUpdate {
   readonly state: DailyState;
   readonly isNewBest: boolean;
+  readonly isNewBestTime: boolean;
 }
 
 export function applyDailyResult(
   state: DailyState,
   dateKey: string,
-  score: number,
+  result: DailyRoundResult,
 ): DailyResultUpdate {
   if (hasPlayedDaily(state, dateKey)) {
-    return { state, isNewBest: false };
+    return { state, isNewBest: false, isNewBestTime: false };
   }
 
-  const isNewBest = score > state.bestScore;
+  const isNewBest = result.score > state.bestScore;
+  const isNewBestTime =
+    result.won &&
+    (state.bestTimeInSeconds === null || result.elapsedSeconds < state.bestTimeInSeconds);
 
   return {
     state: {
       version: DAILY_VERSION,
       lastPlayedDateKey: dateKey,
-      bestScore: Math.max(state.bestScore, score),
-      scores: { ...state.scores, [dateKey]: score },
+      bestScore: Math.max(state.bestScore, result.score),
+      bestTimeInSeconds: isNewBestTime ? result.elapsedSeconds : state.bestTimeInSeconds,
+      scores: { ...state.scores, [dateKey]: result.score },
     },
     isNewBest,
+    isNewBestTime,
   };
 }

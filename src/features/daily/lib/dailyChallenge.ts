@@ -1,7 +1,7 @@
 import { REPOSITORY_POOL } from '@/features/contributors/lib/repositories';
 import { getDifficulty, type DifficultyId } from '@/features/game/lib/difficulty';
-import { createSeededRandomFromString, getDailySeed } from '@/lib/random';
-import type { DailyChallenge } from '../types';
+import { createSeededRandomFromString, formatDateKey, getDailySeed } from '@/lib/random';
+import type { DailyChallenge, DailyState } from '../types';
 
 export const DAILY_DIFFICULTY: DifficultyId = 'normal';
 
@@ -32,6 +32,29 @@ export function getSecondsUntilNextDaily(date: Date = new Date()): number {
   );
 
   return Math.max(0, Math.ceil((nextMidnight - date.getTime()) / 1000));
+}
+
+export function getPreviousDateKey(dateKey: string): string {
+  const date = new Date(`${dateKey}T00:00:00Z`);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  date.setUTCDate(date.getUTCDate() - 1);
+
+  return formatDateKey(date);
+}
+
+export function computeDailyStreak(state: DailyState, dateKey: string): number {
+  let streak = 0;
+  let cursor =
+    state.scores[dateKey] !== undefined ? dateKey : getPreviousDateKey(dateKey);
+
+  while (cursor.length > 0 && state.scores[cursor] !== undefined) {
+    streak += 1;
+    cursor = getPreviousDateKey(cursor);
+  }
+
+  return streak;
 }
 
 export function formatDailyCountdown(totalSeconds: number): string {

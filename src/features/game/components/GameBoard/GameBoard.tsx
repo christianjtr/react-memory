@@ -54,6 +54,7 @@ export function GameBoard(): ReactElement {
     hasPlayedToday,
     todayScore,
     bestScore: dailyBestScore,
+    streak: dailyStreak,
     secondsUntilNext,
     saveDailyResult,
   } = useDailyChallenge();
@@ -116,7 +117,11 @@ export function GameBoard(): ReactElement {
 
     if (result.mode === 'daily') {
       setIsNewRecord(result.score > dailyBestScore);
-      saveDailyResult(result.score);
+      saveDailyResult({
+        score: result.score,
+        elapsedSeconds: result.elapsedSeconds,
+        won: result.outcome === 'won',
+      });
       return;
     }
 
@@ -257,6 +262,7 @@ export function GameBoard(): ReactElement {
           hasPlayedToday={hasPlayedToday}
           todayScore={todayScore}
           bestScore={dailyBestScore}
+          streak={dailyStreak}
           secondsUntilNext={secondsUntilNext}
           isPlayDisabled={isLoading}
           onPlay={handlePlayDaily}

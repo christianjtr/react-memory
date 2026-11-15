@@ -19,6 +19,7 @@ describe('DailyChallengePanel', () => {
         hasPlayedToday={false}
         todayScore={null}
         bestScore={0}
+        streak={3}
         secondsUntilNext={3661}
         onPlay={onPlay}
       />,
@@ -40,6 +41,7 @@ describe('DailyChallengePanel', () => {
         hasPlayedToday={false}
         todayScore={null}
         bestScore={0}
+        streak={3}
         secondsUntilNext={3661}
         isPlayDisabled
         onPlay={vi.fn()}
@@ -56,6 +58,7 @@ describe('DailyChallengePanel', () => {
         hasPlayedToday
         todayScore={900}
         bestScore={1200}
+        streak={1}
         secondsUntilNext={125}
         onPlay={vi.fn()}
       />,
@@ -63,7 +66,7 @@ describe('DailyChallengePanel', () => {
 
     expect(screen.getByText('Hoy: 900 pts')).toBeInTheDocument();
     expect(screen.getByText('Nuevo reto en 2 min 5 s')).toBeInTheDocument();
-    expect(screen.getByText('Mejor diario: 1200 pts')).toBeInTheDocument();
+    expect(screen.getByText('Racha: 1 día · Mejor diario: 1200 pts')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Jugar el reto' }),
     ).not.toBeInTheDocument();

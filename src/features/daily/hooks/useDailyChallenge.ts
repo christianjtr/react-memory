@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getDailySeed } from '@/lib/random';
-import { getDailyChallenge, getSecondsUntilNextDaily } from '../lib/dailyChallenge';
+import {
+  computeDailyStreak,
+  getDailyChallenge,
+  getSecondsUntilNextDaily,
+} from '../lib/dailyChallenge';
 import {
   applyDailyResult,
   getDailyScore,
@@ -8,7 +12,7 @@ import {
   readDailyState,
   writeDailyState,
 } from '../lib/dailyStore';
-import type { DailyChallenge, DailyState } from '../types';
+import type { DailyChallenge, DailyRoundResult, DailyState } from '../types';
 
 const COUNTDOWN_TICK_MS = 30_000;
 
@@ -33,8 +37,8 @@ export function useDailyChallenge() {
   const dateKey = getDailySeed(now);
   const challenge: DailyChallenge = useMemo(() => getDailyChallenge(now), [now]);
 
-  const saveDailyResult = useCallback((score: number): void => {
-    setState((current) => applyDailyResult(current, getDailySeed(), score).state);
+  const saveDailyResult = useCallback((result: DailyRoundResult): void => {
+    setState((current) => applyDailyResult(current, getDailySeed(), result).state);
   }, []);
 
   return {
@@ -43,6 +47,8 @@ export function useDailyChallenge() {
     hasPlayedToday: hasPlayedDaily(state, dateKey),
     todayScore: getDailyScore(state, dateKey),
     bestScore: state.bestScore,
+    bestTimeInSeconds: state.bestTimeInSeconds,
+    streak: computeDailyStreak(state, dateKey),
     secondsUntilNext: getSecondsUntilNextDaily(now),
     saveDailyResult,
   };
