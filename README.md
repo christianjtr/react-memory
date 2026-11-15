@@ -57,9 +57,57 @@ provides more than enough candidates for the included difficulty levels.
 ## Gameplay and effects
 
 - Choose **Easy** (4 pairs / 90 seconds), **Normal** (6 / 60), or **Hard** (8 / 45).
-- Flip animated 3D cards, track your score and timer, and celebrate a win with confetti.
-- Your best score is saved in browser `localStorage`.
+- Flip animated 3D cards, track your score, streak, accuracy and timer, and celebrate
+  a win with confetti.
+- Set your nickname to personalize the results screen.
+- Share a finished round through the Web Share API (with the project preview image
+  attached when the platform supports it) or copy it to the clipboard as a fallback.
+- Play the **daily challenge**: one seeded board per day for everyone, locked after
+  your first attempt until the next UTC midnight.
+- All progress is saved in browser `localStorage`; there is no backend.
 - Animations respect the operating system's reduced-motion preference.
+
+## Scoring
+
+Each finished round is computed from four ingredients:
+
+```
+score = base + streak bonus + time bonus - error penalty
+
+base          = pairs found × 100 × difficulty multiplier
+multiplier    = easy 1.0 · normal 1.5 · hard 2.0
+streak bonus  = (level - 1) × 25 points per matching streak step
+time bonus    = remaining seconds × 5
+error penalty = mistakes × 25
+```
+
+- A mistake resets the current streak to zero (streak points already earned are kept).
+- Accuracy is `pairs found / (pairs found + mistakes)`.
+- Records are tracked per difficulty: best score, best time, best accuracy, games
+  played, wins, and the best streak.
+
+## Daily challenge
+
+Every UTC day the app derives the same challenge for all players from the date:
+a seeded repository pick from the curated pool and the normal difficulty. The board
+layout is generated with a seeded shuffle, so everyone faces the same arrangement.
+
+- One attempt per day: completing a round (win or lose) locks the challenge until
+  the next UTC midnight. The panel shows your score and a live countdown.
+- Daily attempts keep their own history and best score, separate from classic
+  records.
+- Known limitation: the deck layout is deterministic, but the underlying
+  contributor list comes from the live GitHub API, so the exact people on the
+  cards can vary between fetches.
+
+## Storage keys
+
+| Key                        | Contents                                        |
+| -------------------------- | ----------------------------------------------- |
+| `github-memory:v2:player`  | Nickname and player profile                     |
+| `github-memory:v2:records` | Per-difficulty records and global best score    |
+| `github-memory:v2:daily`   | Daily challenge history, best score and lock    |
+| `github-memory:best-score` | Legacy v1 best score, migrated and then removed |
 
 ## Scripts
 
@@ -87,7 +135,11 @@ src/
   features/
     contributors/            GitHub API, repository pool, adapter, hook and types
     game/                    animated UI, context, reducer, hooks, difficulty and deck logic
-  lib/                       shared utilities
+    player/                  nickname identity and settings modal
+    records/                 per-difficulty records store and modal
+    share/                   Web Share API integration with clipboard fallback
+    daily/                   seeded daily challenge, store, hook and panel
+  lib/                       shared utilities (storage, seeded random, shuffle)
   styles/                    Tailwind entry point
   test/                      test setup and fixtures
 ```
