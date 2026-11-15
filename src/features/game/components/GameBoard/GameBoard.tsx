@@ -38,8 +38,15 @@ export function GameBoard(): ReactElement {
   } = gameState;
   const { contributors, contributorsRepository, isLoading, error, fetchData } =
     useGithubContributors();
-  const { selectCard, startGame, resetGame, setDifficulty, setRepository, setMode, isMovePending } =
-    useGame();
+  const {
+    selectCard,
+    startGame,
+    resetGame,
+    setDifficulty,
+    setRepository,
+    setMode,
+    isMovePending,
+  } = useGame();
   const { profile, saveNickname } = usePlayerProfile();
   const { records, saveRound } = useRecords();
   const {
@@ -259,10 +266,7 @@ export function GameBoard(): ReactElement {
           <DifficultySelector
             value={difficulty}
             disabled={
-              isLoading ||
-              status === 'idle' ||
-              contributors.length === 0 ||
-              isDailyMode
+              isLoading || status === 'idle' || contributors.length === 0 || isDailyMode
             }
             onChange={handleDifficultyChange}
           />

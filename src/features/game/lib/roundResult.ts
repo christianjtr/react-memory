@@ -1,11 +1,6 @@
 import { formatRepository } from '@/features/contributors/lib/repositories';
 import { buildScoreBreakdown, computeAccuracy } from './scoring';
-import type {
-  DifficultyId,
-  GameMode,
-  GameOutcome,
-  GameState,
-} from '../types';
+import type { DifficultyId, GameMode, GameOutcome, GameState } from '../types';
 
 export interface RoundResult {
   readonly mode: GameMode;

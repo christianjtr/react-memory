@@ -204,17 +204,13 @@ describe('useGame', () => {
       result.current.game.startGame(contributorsFixture, { config: testConfig });
     });
 
-    const firstDeck = result.current.state.cards.map(
-      (card) => card.contributor.id,
-    );
+    const firstDeck = result.current.state.cards.map((card) => card.contributor.id);
 
     act(() => {
       result.current.game.startGame(contributorsFixture, { config: testConfig });
     });
 
-    const secondDeck = result.current.state.cards.map(
-      (card) => card.contributor.id,
-    );
+    const secondDeck = result.current.state.cards.map((card) => card.contributor.id);
 
     expect(firstDeck).toEqual(secondDeck);
     expect(result.current.state.round).toMatchObject({ mode: 'daily' });
@@ -232,9 +228,7 @@ describe('useGame', () => {
       result.current.game.startGame(contributorsFixture, { config: testConfig });
     });
 
-    const firstDeck = result.current.state.cards.map(
-      (card) => card.contributor.id,
-    );
+    const firstDeck = result.current.state.cards.map((card) => card.contributor.id);
 
     act(() => {
       result.current.game.setMode('daily', 'github-memory:daily:2026-01-02');
@@ -244,9 +238,7 @@ describe('useGame', () => {
       result.current.game.startGame(contributorsFixture, { config: testConfig });
     });
 
-    const secondDeck = result.current.state.cards.map(
-      (card) => card.contributor.id,
-    );
+    const secondDeck = result.current.state.cards.map((card) => card.contributor.id);
 
     expect(firstDeck).not.toEqual(secondDeck);
   });
@@ -266,9 +258,7 @@ describe('useGame', () => {
       });
     });
 
-    const firstDeck = result.current.state.cards.map(
-      (card) => card.contributor.id,
-    );
+    const firstDeck = result.current.state.cards.map((card) => card.contributor.id);
 
     act(() => {
       result.current.game.setMode('daily', 'github-memory:daily:2026-01-02');
@@ -281,9 +271,7 @@ describe('useGame', () => {
       });
     });
 
-    const secondDeck = result.current.state.cards.map(
-      (card) => card.contributor.id,
-    );
+    const secondDeck = result.current.state.cards.map((card) => card.contributor.id);
 
     expect(firstDeck).toEqual(secondDeck);
   });

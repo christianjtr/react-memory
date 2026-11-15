@@ -109,18 +109,12 @@ export function readRecords(): RecordsState {
 
   return {
     version: RECORDS_VERSION,
-    globalBestScore: Math.max(
-      numberField(stored, 'globalBestScore', 0),
-      legacyBestScore,
-    ),
+    globalBestScore: Math.max(numberField(stored, 'globalBestScore', 0), legacyBestScore),
     byDifficulty,
   };
 }
 
-export function applyRound(
-  records: RecordsState,
-  round: RoundSummary,
-): RecordsUpdate {
+export function applyRound(records: RecordsState, round: RoundSummary): RecordsUpdate {
   const current = records.byDifficulty[round.difficulty];
   const isNewBestScore = round.score > current.bestScore;
   const isNewBestTime =
@@ -132,9 +126,7 @@ export function applyRound(
   const updated: DifficultyRecords = {
     ...current,
     bestScore: Math.max(current.bestScore, round.score),
-    bestTimeInSeconds: isNewBestTime
-      ? round.elapsedSeconds
-      : current.bestTimeInSeconds,
+    bestTimeInSeconds: isNewBestTime ? round.elapsedSeconds : current.bestTimeInSeconds,
     bestAccuracy: Math.max(current.bestAccuracy ?? 0, round.accuracy),
     gamesPlayed: current.gamesPlayed + 1,
     wins: current.wins + (round.won ? 1 : 0),

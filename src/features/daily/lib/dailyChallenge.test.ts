@@ -19,9 +19,7 @@ const DATE_KEYS = Array.from({ length: 60 }, (_, index) => {
 
 describe('dailyChallenge', () => {
   it('builds the same challenge for the same date key', () => {
-    expect(buildDailyChallenge('2026-01-01')).toEqual(
-      buildDailyChallenge('2026-01-01'),
-    );
+    expect(buildDailyChallenge('2026-01-01')).toEqual(buildDailyChallenge('2026-01-01'));
   });
 
   it('uses a stable seed, the daily difficulty and the date key', () => {

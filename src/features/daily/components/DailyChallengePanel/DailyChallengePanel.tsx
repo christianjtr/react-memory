@@ -1,10 +1,7 @@
 import { motion } from 'motion/react';
 import type { ReactElement } from 'react';
 import { formatRepository } from '@/features/contributors/lib/repositories';
-import {
-  formatDailyCountdown,
-  getDailyDifficultyLabel,
-} from '../../lib/dailyChallenge';
+import { formatDailyCountdown, getDailyDifficultyLabel } from '../../lib/dailyChallenge';
 import type { DailyChallenge } from '../../types';
 
 export interface DailyChallengePanelProps {
@@ -45,8 +42,8 @@ export function DailyChallengePanel({
           <div className="min-w-0 text-left">
             <p className="text-sm font-black text-violet-950">Reto diario</p>
             <p className="truncate text-xs font-semibold text-violet-700/85">
-              {formatRepository(challenge.repository)} · {getDailyDifficultyLabel()} ·
-              un intento por día
+              {formatRepository(challenge.repository)} · {getDailyDifficultyLabel()} · un
+              intento por día
             </p>
           </div>
         </div>

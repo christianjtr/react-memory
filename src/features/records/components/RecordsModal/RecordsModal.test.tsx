@@ -14,9 +14,7 @@ describe('RecordsModal', () => {
   });
 
   it('renders the empty state', () => {
-    render(
-      <RecordsModal open records={createEmptyRecords()} onClose={vi.fn()} />,
-    );
+    render(<RecordsModal open records={createEmptyRecords()} onClose={vi.fn()} />);
 
     expect(screen.getByText('Todavía no jugaste ninguna partida.')).toBeInTheDocument();
     expect(screen.getByText('Mejor score global')).toBeInTheDocument();
@@ -54,9 +52,7 @@ describe('RecordsModal', () => {
     const onClose = vi.fn();
     const user = userEvent.setup();
 
-    render(
-      <RecordsModal open records={createEmptyRecords()} onClose={onClose} />,
-    );
+    render(<RecordsModal open records={createEmptyRecords()} onClose={onClose} />);
 
     await user.click(screen.getByRole('button', { name: 'Cerrar' }));
 

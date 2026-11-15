@@ -1,10 +1,5 @@
 import type { Repository } from '@/features/contributors/types';
-import type {
-  DifficultyId,
-  GameCard,
-  GameConfig,
-  GameMode,
-} from '../types';
+import type { DifficultyId, GameCard, GameConfig, GameMode } from '../types';
 
 export const GAME_ACTION_TYPES = {
   START_GAME: 'START_GAME',

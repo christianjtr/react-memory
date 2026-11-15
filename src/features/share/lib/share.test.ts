@@ -29,11 +29,13 @@ const result: RoundResult = {
   elapsedSeconds: 18,
 };
 
-function installNavigator(options: {
-  share?: (data: ShareData) => Promise<void>;
-  canShare?: (data?: ShareData) => boolean;
-  clipboard?: boolean;
-} = {}) {
+function installNavigator(
+  options: {
+    share?: (data: ShareData) => Promise<void>;
+    canShare?: (data?: ShareData) => boolean;
+    clipboard?: boolean;
+  } = {},
+) {
   const share = vi.fn(options.share ?? (async () => undefined));
   const canShare = vi.fn(options.canShare ?? (() => true));
   const writeText = vi.fn(async () => undefined);

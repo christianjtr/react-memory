@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getDailySeed } from '@/lib/random';
-import {
-  getDailyChallenge,
-  getSecondsUntilNextDaily,
-} from '../lib/dailyChallenge';
+import { getDailyChallenge, getSecondsUntilNextDaily } from '../lib/dailyChallenge';
 import {
   applyDailyResult,
   getDailyScore,

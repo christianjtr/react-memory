@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type ReactElement, type SyntheticEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactElement,
+  type SyntheticEvent,
+} from 'react';
 import { motion } from 'motion/react';
 import { MAX_NICKNAME_LENGTH } from '../../types';
 

@@ -95,7 +95,11 @@ describe('recordsStore', () => {
 
   it('keeps the best score and the fastest time', () => {
     const first = applyRound(createEmptyRecords(), round).records;
-    const second = applyRound(first, { ...round, score: 900, elapsedSeconds: 55 }).records;
+    const second = applyRound(first, {
+      ...round,
+      score: 900,
+      elapsedSeconds: 55,
+    }).records;
 
     expect(second.byDifficulty.normal.bestScore).toBe(1200);
     expect(second.byDifficulty.normal.bestTimeInSeconds).toBe(42);

@@ -65,10 +65,7 @@ export function useGame() {
   );
 
   const startGame = useCallback(
-    (
-      contributors: readonly Contributor[],
-      options?: StartGameOptions,
-    ): void => {
+    (contributors: readonly Contributor[], options?: StartGameOptions): void => {
       const repository = state.repository;
 
       if (repository === null) {

@@ -42,7 +42,9 @@ describe('GameResultsModal', () => {
     });
 
     expect(screen.getByText('¡VICTORIA!')).toBeInTheDocument();
-    expect(screen.getByText('Completaste todas las parejas a tiempo')).toBeInTheDocument();
+    expect(
+      screen.getByText('Completaste todas las parejas a tiempo'),
+    ).toBeInTheDocument();
     expect(screen.getByText('ada')).toBeInTheDocument();
     expect(screen.getByText('Score: 1160')).toBeInTheDocument();
     expect(screen.getByText('+900')).toBeInTheDocument();
@@ -74,7 +76,9 @@ describe('GameResultsModal', () => {
     });
 
     expect(screen.getByText('GAME OVER')).toBeInTheDocument();
-    expect(screen.getByText('Se acabó el tiempo, ¡inténtalo de nuevo!')).toBeInTheDocument();
+    expect(
+      screen.getByText('Se acabó el tiempo, ¡inténtalo de nuevo!'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Score: 950')).toBeInTheDocument();
   });
 

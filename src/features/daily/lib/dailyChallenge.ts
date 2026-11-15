@@ -1,9 +1,6 @@
 import { REPOSITORY_POOL } from '@/features/contributors/lib/repositories';
 import { getDifficulty, type DifficultyId } from '@/features/game/lib/difficulty';
-import {
-  createSeededRandomFromString,
-  getDailySeed,
-} from '@/lib/random';
+import { createSeededRandomFromString, getDailySeed } from '@/lib/random';
 import type { DailyChallenge } from '../types';
 
 export const DAILY_DIFFICULTY: DifficultyId = 'normal';

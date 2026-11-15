@@ -1,10 +1,5 @@
 export type ShareStatus =
-  | 'idle'
-  | 'sharing'
-  | 'shared'
-  | 'copied'
-  | 'cancelled'
-  | 'failed';
+  'idle' | 'sharing' | 'shared' | 'copied' | 'cancelled' | 'failed';
 
 export interface SharePayload {
   readonly title: string;

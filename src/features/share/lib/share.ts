@@ -11,10 +11,7 @@ export const PREVIEW_IMAGE_URL =
 
 const SHARE_TITLE = 'Github Memory';
 
-export function buildSharePayload(
-  result: RoundResult,
-  nickname: string,
-): SharePayload {
+export function buildSharePayload(result: RoundResult, nickname: string): SharePayload {
   const difficultyLabel = getDifficulty(result.difficulty).label;
   const player = nickname.length > 0 ? nickname : 'Un jugador';
 
@@ -40,9 +37,7 @@ export function isClipboardSupported(): boolean {
   );
 }
 
-export async function fetchPreviewImage(
-  imageUrl: string,
-): Promise<File | null> {
+export async function fetchPreviewImage(imageUrl: string): Promise<File | null> {
   try {
     const response = await fetch(imageUrl, { mode: 'cors' });
     if (!response.ok) return null;

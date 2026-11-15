@@ -134,7 +134,9 @@ export function RecordsModal({
                       </dd>
                     </div>
                     <div className="flex items-center justify-between">
-                      <dt className="font-semibold text-violet-600/80">Mejor precisión</dt>
+                      <dt className="font-semibold text-violet-600/80">
+                        Mejor precisión
+                      </dt>
                       <dd className="font-black text-violet-900 tabular-nums">
                         {entry.bestAccuracy === null ? '—' : `${entry.bestAccuracy}%`}
                       </dd>

@@ -22,14 +22,7 @@ describe('PlayerSettingsModal', () => {
     const onClose = vi.fn();
     const user = userEvent.setup();
 
-    render(
-      <PlayerSettingsModal
-        open
-        nickname="ada"
-        onClose={onClose}
-        onSave={onSave}
-      />,
-    );
+    render(<PlayerSettingsModal open nickname="ada" onClose={onClose} onSave={onSave} />);
 
     const input = screen.getByLabelText('Apodo');
     await user.clear(input);
@@ -45,14 +38,7 @@ describe('PlayerSettingsModal', () => {
     const onClose = vi.fn();
     const user = userEvent.setup();
 
-    render(
-      <PlayerSettingsModal
-        open
-        nickname="ada"
-        onClose={onClose}
-        onSave={onSave}
-      />,
-    );
+    render(<PlayerSettingsModal open nickname="ada" onClose={onClose} onSave={onSave} />);
 
     await user.click(screen.getByRole('button', { name: 'Cancelar' }));
 
