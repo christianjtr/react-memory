@@ -13,6 +13,12 @@ The `v1.0.0` tag is an immutable historical reference; the default branch contai
 
 https://christianjtr.github.io/react-memory
 
+## Screenshots
+
+![Github Memory gameplay screenshot](samples/app-screenshot.png)
+
+![Github Memory gameplay demo](samples/app-demo.gif)
+
 ## Tech stack
 
 - React 19 + TypeScript 5.9
@@ -60,8 +66,8 @@ provides more than enough candidates for the included difficulty levels.
 - Flip animated 3D cards, track your score, streak, accuracy and timer, and celebrate
   a win with confetti.
 - Set your nickname to personalize the results screen.
-- Share a finished round through the Web Share API (with the project preview image
-  attached when the platform supports it) or copy it to the clipboard as a fallback.
+- Copy the repository link to share the game; round results remain visible in the
+  results screen.
 - Play the **daily challenge**: one seeded board per day for everyone, locked after
   your first attempt until the next UTC midnight.
 - All progress is saved in browser `localStorage`; there is no backend.
@@ -137,7 +143,7 @@ src/
     game/                    animated UI, context, reducer, hooks, difficulty and deck logic
     player/                  nickname identity and settings modal
     records/                 per-difficulty records store and modal
-    share/                   Web Share API integration with clipboard fallback
+    share/                   repository-link clipboard sharing
     daily/                   seeded daily challenge, store, hook and panel
   lib/                       shared utilities (storage, seeded random, shuffle)
   styles/                    Tailwind entry point
