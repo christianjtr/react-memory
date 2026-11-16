@@ -1,0 +1,60 @@
+import { statsBuffer } from './buffer.mjs';
+
+/**
+ * The metrics projection counts, in the order of the index it passes to
+ * statsBuffer.countProjection.
+ */
+const projectionMetrics = [
+    "nodes",
+    "calculatedTargetDeltas",
+    "calculatedProjections",
+];
+function clearStatsBuffer() {
+    statsBuffer.value = null;
+    statsBuffer.addProjectionMetrics = null;
+    statsBuffer.countProjection = undefined;
+}
+function recordStats() {
+    if (statsBuffer.value) {
+        clearStatsBuffer();
+        throw new Error("Stats are already being measured");
+    }
+    const buffer = statsBuffer;
+    buffer.value = {
+        layoutProjection: {
+            nodes: [],
+            calculatedTargetDeltas: [],
+            calculatedProjections: [],
+        },
+    };
+    buffer.addProjectionMetrics = (metrics) => {
+        const { layoutProjection } = buffer.value;
+        layoutProjection.nodes.push(metrics.nodes);
+        layoutProjection.calculatedTargetDeltas.push(metrics.calculatedTargetDeltas);
+        layoutProjection.calculatedProjections.push(metrics.calculatedProjections);
+    };
+    /**
+     * Counting lives here rather than in projection, so bundles that never
+     * call recordStats() don't ship it.
+     */
+    const metrics = {
+        nodes: 0,
+        calculatedTargetDeltas: 0,
+        calculatedProjections: 0,
+    };
+    buffer.countProjection = (metric) => {
+        if (metric !== undefined) {
+            metrics[projectionMetrics[metric]]++;
+        }
+        else {
+            buffer.addProjectionMetrics(metrics);
+            metrics.nodes =
+                metrics.calculatedTargetDeltas =
+                    metrics.calculatedProjections =
+                        0;
+        }
+    };
+}
+
+export { recordStats };
+//# sourceMappingURL=index.mjs.map
