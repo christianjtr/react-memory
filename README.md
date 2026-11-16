@@ -155,7 +155,10 @@ validation and mapping are isolated from UI components.
 
 ## Quality and security
 
-- `npm audit` is expected to report zero vulnerabilities.
+- `npm audit` reports 7 known moderate advisories in `minimatch`, a transitive
+  dependency of `typescript-eslint` (dev-only tooling). The advisories have no
+  fix that avoids downgrading the toolchain; CI gates on high severity and
+  above, and Dependabot tracks a resolution upstream.
 - Dependencies are grouped in weekly Dependabot pull requests.
 - Repository segments are validated before building the GitHub API URL.
 - Random repository choices come from a curated list of popular public projects.
