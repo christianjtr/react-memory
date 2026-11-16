@@ -28,7 +28,7 @@ https://christianjtr.github.io/react-memory
 
 ## Requirements
 
-- Node.js 24.15 or newer (see `.nvmrc`)
+- Node.js 24.22 or newer (see `.nvmrc`)
 - npm 11
 
 ## Getting started
@@ -162,4 +162,5 @@ validation and mapping are isolated from UI components.
   `https://avatars.githubusercontent.com`.
 - CI runs audit, lint, typecheck, tests with coverage and a production build on every
   push and pull request to `develop`.
-- The production build is deployed to GitHub Pages from `develop`.
+- The production build is deployed to GitHub Pages: the deploy workflow builds from
+  `develop` and publishes the result to the `demo` branch.
