@@ -17,6 +17,8 @@ https://christianjtr.github.io/react-memory
 
 ![Github Memory gameplay screenshot](samples/app-screenshot.png)
 
+![Github Memory gameplay demo](samples/app-demo.gif)
+
 ## Tech stack
 
 - React 19 + TypeScript 5.9
