@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { GameResultsModal } from '@/features/game/components';
@@ -31,15 +31,20 @@ const finishedState: Partial<GameState> = {
 
 describe('GameResultsModal', () => {
   it('does not render while the game is running', () => {
-    const { container } = renderWithGameState(<GameResultsModal onOk={vi.fn()} />);
+    const { container } = renderWithGameState(
+      <GameResultsModal open onClose={vi.fn()} onOk={vi.fn()} />,
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('celebrates a victory with the score breakdown', () => {
-    renderWithGameState(<GameResultsModal onOk={vi.fn()} nickname="ada" />, {
-      state: finishedState,
-    });
+    renderWithGameState(
+      <GameResultsModal open onClose={vi.fn()} onOk={vi.fn()} nickname="ada" />,
+      {
+        state: finishedState,
+      },
+    );
 
     expect(screen.getByText('¡VICTORIA!')).toBeInTheDocument();
     expect(
@@ -54,7 +59,7 @@ describe('GameResultsModal', () => {
   });
 
   it('shows the round statistics', () => {
-    renderWithGameState(<GameResultsModal onOk={vi.fn()} />, {
+    renderWithGameState(<GameResultsModal open onClose={vi.fn()} onOk={vi.fn()} />, {
       state: finishedState,
     });
 
@@ -66,7 +71,7 @@ describe('GameResultsModal', () => {
   });
 
   it('reports a loss when the time runs out', () => {
-    renderWithGameState(<GameResultsModal onOk={vi.fn()} />, {
+    renderWithGameState(<GameResultsModal open onClose={vi.fn()} onOk={vi.fn()} />, {
       state: {
         ...finishedState,
         outcome: 'lost',
@@ -86,11 +91,54 @@ describe('GameResultsModal', () => {
     const onOk = vi.fn();
     const user = userEvent.setup();
 
-    renderWithGameState(<GameResultsModal onOk={onOk} />, { state: finishedState });
+    renderWithGameState(<GameResultsModal open onClose={vi.fn()} onOk={onOk} />, {
+      state: finishedState,
+    });
 
     await user.click(screen.getByRole('button', { name: 'New game!' }));
 
     expect(onOk).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render when closed even if the game is finished', () => {
+    const { container } = renderWithGameState(
+      <GameResultsModal open={false} onClose={vi.fn()} onOk={vi.fn()} />,
+      { state: finishedState },
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('closes from the close button without restarting the game', async () => {
+    const onClose = vi.fn();
+    const onOk = vi.fn();
+    const user = userEvent.setup();
+
+    renderWithGameState(<GameResultsModal open onClose={onClose} onOk={onOk} />, {
+      state: finishedState,
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Cerrar resultados' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onOk).not.toHaveBeenCalled();
+  });
+
+  it('closes on cancel without restarting the game', async () => {
+    const onClose = vi.fn();
+    const onOk = vi.fn();
+
+    renderWithGameState(<GameResultsModal open onClose={onClose} onOk={onOk} />, {
+      state: finishedState,
+    });
+
+    fireEvent(
+      screen.getByRole('dialog'),
+      new Event('cancel', { bubbles: true, cancelable: true }),
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onOk).not.toHaveBeenCalled();
   });
 
   it('opens the records panel when requested', async () => {
@@ -98,7 +146,12 @@ describe('GameResultsModal', () => {
     const user = userEvent.setup();
 
     renderWithGameState(
-      <GameResultsModal onOk={vi.fn()} onOpenRecords={onOpenRecords} />,
+      <GameResultsModal
+        open
+        onClose={vi.fn()}
+        onOk={vi.fn()}
+        onOpenRecords={onOpenRecords}
+      />,
       { state: finishedState },
     );
 
@@ -115,7 +168,9 @@ describe('GameResultsModal', () => {
       configurable: true,
     });
 
-    renderWithGameState(<GameResultsModal onOk={vi.fn()} />, { state: finishedState });
+    renderWithGameState(<GameResultsModal open onClose={vi.fn()} onOk={vi.fn()} />, {
+      state: finishedState,
+    });
 
     await user.click(screen.getByRole('button', { name: 'Compartir' }));
     expect(

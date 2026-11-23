@@ -31,6 +31,8 @@ export function GameBoard(): ReactElement {
     cards,
     status,
     isGameOver,
+    finalScore,
+    outcome,
     pendingResolution,
     selectedCardIds,
     difficulty,
@@ -62,6 +64,7 @@ export function GameBoard(): ReactElement {
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [isPlayerSettingsOpen, setIsPlayerSettingsOpen] = useState(false);
   const [isRecordsOpen, setIsRecordsOpen] = useState(false);
+  const [isResultsOpen, setIsResultsOpen] = useState(false);
   const previousBestScore = useRef(records.globalBestScore);
   const recordedRoundRef = useRef<number | null>(null);
   const hasInitializedRepository = useRef(false);
@@ -138,6 +141,10 @@ export function GameBoard(): ReactElement {
       won: result.outcome === 'won',
     });
   }, [bestScore, dailyBestScore, gameState, isGameOver, saveDailyResult, saveRound]);
+
+  useEffect(() => {
+    setIsResultsOpen(isGameOver);
+  }, [isGameOver]);
 
   const handleRetry = (): void => {
     if (repository === null) return;
@@ -285,11 +292,31 @@ export function GameBoard(): ReactElement {
           aria-label="Zona de juego"
           className="rounded-[2rem] border border-white/80 bg-violet-50/80 p-3 shadow-[0_34px_80px_-46px_rgb(76_29_149_/_0.85)] backdrop-blur-xl sm:p-5">
           <GameBoardFooter bestScore={displayBestScore} />
+          {isGameOver && !isResultsOpen ? (
+            <motion.div
+              role="status"
+              className="mb-4 flex flex-wrap items-center justify-center gap-3 rounded-2xl border border-violet-200 bg-white/90 px-4 py-3 text-center shadow-card"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}>
+              <p className="font-black text-violet-900">
+                {outcome === 'won' ? '¡VICTORIA!' : 'GAME OVER'} · Puntaje final:{' '}
+                {finalScore ?? 0}
+              </p>
+              <button
+                type="button"
+                className="rounded-xl bg-violet-700 px-4 py-2 font-black text-white transition hover:bg-violet-800 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-700"
+                onClick={() => setIsResultsOpen(true)}>
+                Ver resultados
+              </button>
+            </motion.div>
+          ) : null}
           {renderContent()}
         </section>
       </main>
 
       <GameResultsModal
+        open={isResultsOpen}
+        onClose={() => setIsResultsOpen(false)}
         onOk={handleNewRepository}
         onOpenRecords={() => setIsRecordsOpen(true)}
         bestScore={displayBestScore}

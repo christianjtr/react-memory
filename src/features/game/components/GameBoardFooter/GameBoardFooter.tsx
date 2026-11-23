@@ -11,11 +11,20 @@ export interface GameBoardFooterProps {
 export function GameBoardFooter({
   bestScore = 0,
 }: GameBoardFooterProps): ReactElement | null {
-  const { score, timer, status, config, foundContributorIds, streak, errors } =
-    useGameState();
+  const {
+    score,
+    finalScore,
+    timer,
+    status,
+    config,
+    foundContributorIds,
+    streak,
+    errors,
+  } = useGameState();
 
   if (status === 'idle') return null;
 
+  const displayedScore = status === 'finished' ? (finalScore ?? score) : score;
   const pairsFound = foundContributorIds.length;
   const progress = Math.min(1, pairsFound / Math.max(1, config.pairsOfCards));
   const accuracy = computeAccuracy(pairsFound, errors);
@@ -43,16 +52,16 @@ export function GameBoardFooter({
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-[0.6rem] font-bold tracking-[0.22em] text-violet-500 uppercase">
-              Puntaje
+              {status === 'finished' ? 'Puntaje final' : 'Puntaje'}
             </p>
             <motion.p
-              key={score}
+              key={displayedScore}
               className="text-xl font-black text-ink tabular-nums sm:text-2xl"
               aria-live="polite"
               initial={{ scale: 0.82, opacity: 0.4 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 420, damping: 20 }}>
-              {score}
+              {displayedScore}
             </motion.p>
           </div>
 

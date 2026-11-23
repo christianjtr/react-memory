@@ -14,6 +14,8 @@ import { buildRoundResult } from '../../lib/roundResult';
 import { ScoreBreakdownList } from './ScoreBreakdownList';
 
 export interface GameResultsModalProps {
+  readonly open: boolean;
+  readonly onClose: () => void;
   readonly onOk: () => void;
   readonly onOpenRecords?: () => void;
   readonly bestScore?: number;
@@ -28,6 +30,8 @@ interface StatItem {
 }
 
 export function GameResultsModal({
+  open,
+  onClose,
   onOk,
   onOpenRecords,
   bestScore = 0,
@@ -43,7 +47,7 @@ export function GameResultsModal({
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!gameState.isGameOver) return;
+    if (!open) return;
 
     const dialog = dialogRef.current;
     if (dialog === null) return;
@@ -69,13 +73,13 @@ export function GameResultsModal({
       previousFocusRef.current?.focus();
       resetShare();
     };
-  }, [gameState.isGameOver, resetShare]);
+  }, [open, resetShare]);
 
-  if (!gameState.isGameOver || result === null) return null;
+  if (!open || result === null) return null;
 
   const handleCancel = (event: SyntheticEvent<HTMLDialogElement>): void => {
     event.preventDefault();
-    onOk();
+    onClose();
   };
 
   const handleShareToggle = (): void => {
@@ -127,6 +131,21 @@ export function GameResultsModal({
         initial={{ opacity: 0, scale: 0.86, y: 28 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 240, damping: 22 }}>
+        <button
+          type="button"
+          aria-label="Cerrar resultados"
+          className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-violet-700 shadow-sm transition hover:bg-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+          onClick={onClose}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+            <path
+              d="M6 6l12 12M18 6 6 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+
         <span
           aria-hidden="true"
           className="pointer-events-none absolute -top-24 -left-16 h-48 w-48 rounded-full bg-fuchsia-300/50 blur-2xl"

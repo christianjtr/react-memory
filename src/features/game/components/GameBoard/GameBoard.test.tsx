@@ -124,7 +124,16 @@ describe('GameBoard', () => {
     expect(within(dialog).getByText('¡VICTORIA!')).toBeInTheDocument();
     expect(within(dialog).getByText(/^Score: \d+$/)).toBeInTheDocument();
 
-    await user.click(within(dialog).getByRole('button', { name: 'New game!' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Cerrar resultados' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText(/Puntaje final: \d+/)).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /pareja encontrada/ })).toHaveLength(12);
+
+    await user.click(screen.getByRole('button', { name: 'Ver resultados' }));
+
+    const reopenedDialog = await screen.findByRole('dialog');
+    await user.click(within(reopenedDialog).getByRole('button', { name: 'New game!' }));
 
     await waitFor(() => {
       expect(fetchRepositoryContributorsMock).toHaveBeenCalledTimes(2);
