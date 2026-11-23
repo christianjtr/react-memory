@@ -7,7 +7,7 @@ A colorful, animated memory game that matches contributors from popular GitHub r
 - **Version 2 (current):** the actively developed experience documented below.
 - **Version 1:** preserved at the [`v1.0.0` tag](https://github.com/christianjtr/react-memory/tree/v1.0.0), a snapshot of the original game before the redesign and modernization.
 
-The `v1.0.0` tag is an immutable historical reference; the default branch contains the evolved version 2 codebase.
+The `v1.0.0` tag is an immutable historical reference; the default branch contains the evolved version 2 codebase. The `version` field in `package.json` is kept at `1.0.0` for that historical tag and is not used to label the current release.
 
 ## Live demo
 
@@ -30,8 +30,8 @@ https://christianjtr.github.io/react-memory
 
 ## Requirements
 
-- Node.js 24.22 or newer (see `.nvmrc`)
-- npm 11
+- Node.js 24.22.1 (pinned in `.nvmrc`; `package.json` requires >=24.15.0)
+- npm 11.19.1 (pinned in `package.json`)
 
 ## Getting started
 
@@ -66,6 +66,8 @@ provides more than enough candidates for the included difficulty levels.
 - Flip animated 3D cards, track your score, streak, accuracy and timer, and celebrate
   a win with confetti.
 - Set your nickname to personalize the results screen.
+- Close the result modal with the X button or Escape to inspect the finished board;
+  the final score stays visible in the HUD, and a banner lets you reopen the results.
 - Copy the repository link to share the game; round results remain visible in the
   results screen.
 - Play the **daily challenge**: one seeded board per day for everyone, locked after
@@ -80,15 +82,15 @@ Each finished round is computed from four ingredients:
 ```
 score = base + streak bonus + time bonus - error penalty
 
-base          = pairs found × 100 × difficulty multiplier
-multiplier    = easy 1.0 · normal 1.5 · hard 2.0
-streak bonus  = (level - 1) × 25 points per matching streak step
+base          = pairs found × difficulty multiplier
+multiplier    = easy 100 · normal 150 · hard 200
+streak bonus  = (streak - 1) × 25 points per matching streak step (streak >= 2)
 time bonus    = remaining seconds × 5
 error penalty = mistakes × 25
 ```
 
 - A mistake resets the current streak to zero (streak points already earned are kept).
-- Accuracy is `pairs found / (pairs found + mistakes)`.
+- Accuracy is the rounded percentage of `pairs found / (pairs found + mistakes)`.
 - Records are tracked per difficulty: best score, best time, best accuracy, games
   played, wins, and the best streak.
 
@@ -138,6 +140,7 @@ layout is generated with a seeded shuffle, so everyone faces the same arrangemen
 ```text
 src/
   app/                       application bootstrap
+  components/ui/             shared animated background and confetti
   features/
     contributors/            GitHub API, repository pool, adapter, hook and types
     game/                    animated UI, context, reducer, hooks, difficulty and deck logic
@@ -145,9 +148,10 @@ src/
     records/                 per-difficulty records store and modal
     share/                   repository-link clipboard sharing
     daily/                   seeded daily challenge, store, hook and panel
-  lib/                       shared utilities (storage, seeded random, shuffle)
+  lib/                       shared utilities (storage, seeded random, shuffle, assertNever)
   styles/                    Tailwind entry point
-  test/                      test setup and fixtures
+  test/                      test setup, fixtures and renderWithGameState helper
+  vite-env.d.ts              Vite client type declarations
 ```
 
 The project is organized by feature. Game rules live in a pure reducer; API access,
@@ -155,11 +159,10 @@ validation and mapping are isolated from UI components.
 
 ## Quality and security
 
-- `npm audit` reports 7 known moderate advisories in `minimatch`, a transitive
-  dependency of `typescript-eslint` (dev-only tooling). The advisories have no
-  fix that avoids downgrading the toolchain; CI gates on high severity and
-  above, and Dependabot tracks a resolution upstream.
-- Dependencies are grouped in weekly Dependabot pull requests.
+- `npm audit` reports zero vulnerabilities.
+- Dependabot runs weekly: npm dependency updates are grouped in a single pull
+  request per ecosystem group, while GitHub Actions updates are proposed
+  individually.
 - Repository segments are validated before building the GitHub API URL.
 - Random repository choices come from a curated list of popular public projects.
 - Contributor results are cached in memory for the current page session.
@@ -168,4 +171,5 @@ validation and mapping are isolated from UI components.
 - CI runs audit, lint, typecheck, tests with coverage and a production build on every
   push and pull request to `develop`.
 - The production build is deployed to GitHub Pages: the deploy workflow builds from
-  `develop` and publishes the result to the `demo` branch.
+  `develop` and publishes the result to the `demo` branch. It only runs when build
+  inputs change, so documentation-only pushes do not trigger a deployment.

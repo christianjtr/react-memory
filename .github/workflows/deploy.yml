@@ -12,8 +12,6 @@ on:
       - '.nvmrc'
       - 'vite.config.ts'
       - 'tsconfig*.json'
-      - 'postcss.config.*'
-      - 'tailwind.config.*'
       - 'eslint.config.*'
       - '.prettierrc*'
       - '.github/workflows/deploy.yml'
